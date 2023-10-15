@@ -1,0 +1,48 @@
+﻿@model List<Product>
+
+<style>
+    /* Add custom styles here if needed */
+</style>
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header bg-secondary text-white">
+                    <h2 class="text-center">Product List</h2>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-4">
+                        <div class="col-md-6"></div>
+                        <div class="col-md-6 text-end">
+                            <a asp-controller="Product" asp-action="Create" class="btn btn-primary"><i class="bi bi-plus"></i> Add new Product</a>
+                        </div>
+                    </div>
+                    <div class="row">
+                        @if (Model != null && Model.Any())
+                            @foreach (var product in Model.OrderByDescending(u => u.Id))
+                            {
+                                <div class="col-lg-4 col-md-6 col-sm-12 mb-4">
+                                    <div class="card">
+                                        <img src="@product.Poster" class="card-img-top" alt="@product.Name">
+                                        <div class="card-body">
+                                            <h5 class="card-title">@product.Name</h5>
+                                            <p class="card-text">@product.Description</p>
+                                            <p class="card-text">$@product.Price</p>
+                                            <a href="#" class="btn btn-primary">View Details</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            }                       
+                        else
+                        {
+                        <div class="col-12">
+                            <p class="text-center">No products found.</p>
+                        </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
