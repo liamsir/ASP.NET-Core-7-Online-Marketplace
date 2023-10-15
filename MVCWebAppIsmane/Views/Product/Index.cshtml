@@ -2,6 +2,13 @@
 
 <style>
     /* Add custom styles here if needed */
+    .product-card {
+        transition: transform 0.2s;
+    }
+
+        .product-card:hover {
+            transform: scale(1.03);
+        }
 </style>
 
 <div class="container mt-4">
@@ -23,13 +30,16 @@
                             @foreach (var product in Model.OrderByDescending(u => u.Id))
                             {
                                 <div class="col-lg-4 col-md-6 col-sm-12 mb-4">
-                                    <div class="card">
+                                    <div class="card product-card">
                                         <img src="@product.Poster" class="card-img-top" alt="@product.Name">
                                         <div class="card-body">
                                             <h5 class="card-title">@product.Name</h5>
                                             <p class="card-text">@product.Description</p>
                                             <p class="card-text">$@product.Price</p>
-                                            <a href="#" class="btn btn-primary">View Details</a>
+                                            <div class="btn-group" role="group" aria-label="Product Actions">
+                                                <a asp-action="Edit" asp-route-Id="@product.Id" class="btn btn-success"><i class="bi bi-pencil"></i> Edit</a>
+                                                <a asp-action="Delete" asp-route-Id="@product.Id" class="btn btn-danger"><i class="bi bi-trash"></i> Delete</a>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
