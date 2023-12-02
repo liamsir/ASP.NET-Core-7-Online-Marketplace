@@ -13,9 +13,13 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Views\Client\" />
+    <Folder Include="Views\Achat\" />
+    <Folder Include="Views\LigneAchat\" />
     <Folder Include="wwwroot\pics\" />
   </ItemGroup>
 

@@ -1,4 +1,4 @@
-namespace MVCWebAppIsmane.Models
+﻿namespace MVCWebAppIsmane.Models
 {
     public class ErrorViewModel
     {

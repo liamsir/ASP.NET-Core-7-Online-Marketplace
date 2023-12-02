@@ -1,57 +1,94 @@
 ﻿@model List<Product>
 
+<!-- Add necessary CSS links -->
+<link href="https://stackpath.bootstrapcdn.com/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
 <style>
-    /* Add custom styles here if needed */
+    /* Custom styles */
     .product-card {
-        transition: transform 0.2s;
+        transition: transform 0.3s;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+        position: relative;
     }
 
         .product-card:hover {
-            transform: scale(1.03);
+            transform: scale(1.05);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .product-card img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .product-card .card-body {
+            padding: 15px;
+        }
+
+        .product-card .card-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .product-card .btn-group {
+            margin-top: 10px;
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        .product-card:hover .btn-group {
+            opacity: 1;
         }
 </style>
 
+
+
 <div class="container mt-4">
-    <div class="row justify-content-center">
+    <div class="row">
         <div class="col-12">
-            <div class="card shadow">
-                <div class="card-header bg-secondary text-white">
-                    <h2 class="text-center">Product List</h2>
-                </div>
-                <div class="card-body">
-                    <div class="row mb-4">
-                        <div class="col-md-6"></div>
-                        <div class="col-md-6 text-end">
-                            <a asp-controller="Product" asp-action="Create" class="btn btn-primary"><i class="bi bi-plus"></i> Add new Product</a>
-                        </div>
-                    </div>
-                    <div class="row">
-                        @if (Model != null && Model.Any())
-                            @foreach (var product in Model.OrderByDescending(u => u.Id))
-                            {
-                                <div class="col-lg-4 col-md-6 col-sm-12 mb-4">
-                                    <div class="card product-card">
-                                        <img src="@product.Poster" class="card-img-top" alt="@product.Name">
-                                        <div class="card-body">
-                                            <h5 class="card-title">@product.Name</h5>
-                                            <p class="card-text">@product.Description</p>
-                                            <p class="card-text">$@product.Price</p>
-                                            <div class="btn-group" role="group" aria-label="Product Actions">
-                                                <a asp-action="Edit" asp-route-Id="@product.Id" class="btn btn-success"><i class="bi bi-pencil"></i> Edit</a>
-                                                <a asp-action="Delete" asp-route-Id="@product.Id" class="btn btn-danger"><i class="bi bi-trash"></i> Delete</a>
-                                            </div>
+            <div class="row row-cols-1 row-cols-md-3 g-3">
+                @if (Model != null && Model.Any())
+                    @foreach (var product in Model.OrderByDescending(u => u.Id))
+                    {
+                        <div class="col mb-4">
+                            <div class="card product-card">
+                                <img src="@product.Poster" class="card-img-top" alt="@product.Name">
+                                <div class="card-body">
+                                    <h5 class="card-title">@product.Name</h5>
+                                    <p class="card-text">@product.Description</p>
+                                    <p class="card-text">$@product.Price</p>
+                                    @* <div class="btn-group" role="group">
+                                        <a asp-action="Edit" asp-route-Id="@product.Id" class="btn btn-sm btn-success"><i class="bi bi-pencil"></i> Edit</a>
+                                        <a asp-action="Delete" asp-route-Id="@product.Id" class="btn btn-sm btn-danger"><i class="bi bi-trash"></i> Delete</a>
                                         </div>
-                                    </div>
+                                    *@
                                 </div>
-                            }                       
-                        else
-                        {
-                        <div class="col-12">
-                            <p class="text-center">No products found.</p>
+
+                                <div class="btn-group" role="group">
+                                    <form method="post" action="@Url.Action("AddToCart", "Product", new { productId = product.Id })">
+                                        <button type="submit" class="btn btn-sm btn-success">
+                                            <i class="bi bi-cart-plus"></i> Add to Cart
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
                         </div>
-                        }
+                    }
+                else
+                {
+                    <div class="col-12">
+                        <p class="text-center">No products found.</p>
                     </div>
-                </div>
+                }
             </div>
         </div>
     </div>

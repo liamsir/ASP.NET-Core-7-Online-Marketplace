@@ -1,9 +1,11 @@
-﻿using Microsoft.AspNetCore.Hosting;
+﻿
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
 using MVCWebAppIsmane.Data;
 using MVCWebAppIsmane.Models;
+using Newtonsoft.Json;
+
+
 
 namespace MVCWebAppIsmane.Controllers
 {
@@ -32,6 +34,10 @@ namespace MVCWebAppIsmane.Controllers
             return View();
         }
 
+
+
+
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Product model, IFormFile posterFile)
@@ -43,12 +49,10 @@ namespace MVCWebAppIsmane.Controllers
                     string uniqueFileName = Guid.NewGuid().ToString() + "_" + posterFile.FileName;
                     string uploadFolder = Path.Combine(_webHostEnvironment.WebRootPath, "pics");
                     string filePath = Path.Combine(uploadFolder, uniqueFileName);
-
                     using (var fileStream = new FileStream(filePath, FileMode.Create))
                     {
                         await posterFile.CopyToAsync(fileStream);
                     }   
-
                     model.Poster = "pics/" + uniqueFileName;
                 }
 
@@ -143,6 +147,58 @@ namespace MVCWebAppIsmane.Controllers
         }
 
 
+
+
+
+
+        public IActionResult AddToCart(int productId)
+        {
+            // Retrieve the cart items from cookies
+            List<int> cartItems = new List<int>();
+            var existingCart = Request.Cookies["CartItems"];
+            if (!string.IsNullOrEmpty(existingCart))
+            {
+                cartItems = JsonConvert.DeserializeObject<List<int>>(existingCart);
+            }
+
+            // Add the selected product to the cart
+            cartItems.Add(productId);
+
+            // Save the updated cart items in cookies
+            string cartJson = JsonConvert.SerializeObject(cartItems);
+            CookieOptions option = new CookieOptions
+            {
+                Expires = DateTime.Now.AddDays(7) // Adjust the expiration time as needed
+            };
+            Response.Cookies.Append("CartItems", cartJson+"smen", option);
+
+            // Redirect or return a response as needed
+            return RedirectToAction("Index", "Product");
+        }
+
+
+        public IActionResult ViewCart()
+        {
+
+            var existingCart = Request.Cookies["CartItems"];
+
+            List<int> cartItems = new List<int>();
+            if (!string.IsNullOrEmpty(existingCart))
+            {
+                cartItems = JsonConvert.DeserializeObject<List<int>>(existingCart);
+            }
+
+            // Use the cart items to retrieve products from your data store
+            // Replace this logic with how you retrieve products based on their IDs
+
+
+            // Replace with your logic (Retrieve the product list with ids are in cartItems list
+            //List<Product> productsInCart = GetProductsInCart(cartItems);
+
+            // Pass the products in the cart as a model to the Index view
+            //return View("Index", productsInCart);
+            return View("Index", null);
+        }
 
 
 
