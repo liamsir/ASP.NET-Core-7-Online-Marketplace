@@ -1,21 +1,22 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MVCWebAppIsmane.Data;
+using MVCWebAppIsmane.Repositories;
 
 namespace MVCWebAppIsmane.Controllers
 {
     public class CategoryController : Controller
     {
 
-        private readonly DataContext _dataContext;
+        private readonly CategoryRepository _categoryRepository;
 
-        public CategoryController(DataContext dataContext)
+        public CategoryController(CategoryRepository categoryRepository)
         {
-            _dataContext = dataContext;
+            _categoryRepository = categoryRepository;
         }
         public IActionResult Index()
         {
-            var categories = _dataContext.Categories.ToList();
+            var categories = _categoryRepository.GetAll();
             return View(categories);
         }
 

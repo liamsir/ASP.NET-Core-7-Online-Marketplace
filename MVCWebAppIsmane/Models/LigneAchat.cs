@@ -5,11 +5,14 @@ namespace MVCWebAppIsmane.Models
 {
     public class LigneAchat
     {
+
+     
         public int Id { get; set; }
-        public int quantity { get; set; }
+        public int quantity { get; set; } = 1;
 
         [ForeignKey(nameof(Achat))]
         public int IdAchat { get; set; }
+
 
 
         [ValidateNever]
@@ -22,5 +25,21 @@ namespace MVCWebAppIsmane.Models
 
         [ValidateNever]
         public Product Product { get; set; }
+
+        public LigneAchat()
+        {            
+        }
+
+        public LigneAchat(Product product,int quantite)
+        {
+            Product = product;
+            quantity = quantite;
+        }
+
+
+        [NotMapped]
+        public double TotalPrice => quantity * Product.Price;
+
+
     }
 }

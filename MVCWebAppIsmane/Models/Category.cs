@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿    using System.ComponentModel.DataAnnotations;
 using System.ComponentModel;
 
 namespace MVCWebAppIsmane.Models
@@ -13,6 +13,7 @@ namespace MVCWebAppIsmane.Models
 
         [DisplayName("Category Description")]
         [StringLength(100, MinimumLength = 5, ErrorMessage = "Category Description must be between 5 and 100 characters")]
+        
         public string Description { get; set; }
 
         public List<Product> Products { get; set; }

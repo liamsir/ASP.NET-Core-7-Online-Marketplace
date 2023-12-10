@@ -1,0 +1,64 @@
+﻿@model List<Product>
+
+<!-- Display each product in the cart -->
+<div class="container mt-5">
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+        @foreach (var item in Model)
+        {
+            <div class="col">
+                <div class="card h-100 product-card">
+                    <!-- Product Image -->
+                    <img src="@item.Poster" alt="@item.Name" class="card-img-top product-image" asp-append-version="true" />
+                    <div class="card-body">
+                        <!-- Product Details -->
+                        <h5 class="card-title">@item.Name</h5>
+                        <p class="card-text">@item.Description</p>
+                    </div>
+                    <div class="card-footer d-flex justify-content-between align-items-center">
+                        <!-- Product Price -->
+                        <p class="card-text">$@item.Price</p>
+                        <!-- Remove from Cart Form -->
+                        <form asp-action="RemoveFromCart" asp-route-productId="@item.Id">
+                            <button type="submit" class="btn btn-danger">Remove</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<div class="container mt-3">
+    <div class="row justify-content-center">
+        <div class="col-md-6 text-center">
+            <!-- Check if the Model is null or empty -->
+            @if (Model != null && Model.Any())
+            {
+                <!-- Display the purchase button -->
+                <form asp-controller="Achat" asp-action="ViewProducts">
+                    @foreach (var item in Model)
+                    {
+                        <input type="hidden" name="ids" value="@item.Id" />
+                    }
+                    <button type="submit" class="btn btn-success btn-lg">
+                        Proceed to Purchase
+                    </button>
+                </form>
+            }
+            else
+            {
+                <!-- Display the empty state message with a cart icon -->
+                <div class="empty-state">
+                    <!-- Use the cart-x icon from Bootstrap icons and make it large and gray -->
+                    <svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" fill="gray" class="bi bi-cart-x" viewBox="0 0 16 16">
+                        <path d="M.5 1a.5.5 0 0 1 .5.5v1.5a.5.5 0 0 1-.5.5H.25a.75.75 0 0 0-.75.75v10.5a.75.75 0 0 0 .75.75h13.5a.75.75 0 0 0 .75-.75V4.25a.75.75 0 0 0-.75-.75H2.508l-.164-.876A.75.75 0 0 0 1.6 2H.5zm1.5 0h.5a.5.5 0 0 1 .485.379l.637 3.424a.5.5 0 0 1-.485.621H2.694l-.166-.88a.75.75 0 0 0-.718-.621H1.5V1.5a.5.5 0 0 1 .5-.5zM4.5 3a.5.5 0 0 1 .485.379L6.89 11H9.11l2.405-7.621A.5.5 0 0 1 12 3h1.5a.5.5 0 0 1 0 1H12a.5.5 0 0 1-.485.379L9.11 12h-2.22L4.485 4.379A.5.5 0 0 1 4 4H2.5a.5.5 0 0 1 0-1H4.5z" />
+                        <path d="M10.146 10.146a.5.5 0 0 1 .708 0l1 1a.5.5 0 0 1-.708.708l-1-1a.5.5 0 0 1 0-.708zm.708 2.708a.5.5 0 0 0-.708 0l-1-1a.5.5 0 0 0 .708-.708l1 1a.5.5 0 0 0 0 .708z" />
+                    </svg>
+                    <p class="empty-state-message">Your cart is empty. Browse our products and add some to your cart.</p>
+                    <!-- Use a secondary button to redirect the user to the products page -->
+                    <a asp-controller="Product" asp-action="Index" class="btn btn-secondary btn-lg">Shop Now</a>
+                </div>
+            }
+        </div>
+    </div>
+</div>

@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
+using System.ComponentModel.DataAnnotations;
 
 namespace MVCWebAppIsmane.Models
 {
@@ -16,10 +17,12 @@ namespace MVCWebAppIsmane.Models
         [MinLength(8, ErrorMessage = "Password must be at least 8 characters")]
         public string Password { get; set; }
 
-        [Phone(ErrorMessage = "Invalid phone number")]    
         
+        [Phone(ErrorMessage = "Invalid phone number")]            
         public string PhoneNumber { get; set; }
 
+
+        [ValidateNever]
         public List<Achat> Achats { get; set; }
     }
 }

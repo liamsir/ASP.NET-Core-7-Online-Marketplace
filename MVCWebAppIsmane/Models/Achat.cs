@@ -5,11 +5,11 @@ namespace MVCWebAppIsmane.Models
 {
     public class Achat
     {
+
         public int Id { get; set; }
 
         [ForeignKey(nameof(Client))]
-        public int IdClient { get; set; }
-
+        public int IdClient { get; set; } = 1;
 
         [ValidateNever]
         public Client Client { get; init; }
@@ -17,5 +17,15 @@ namespace MVCWebAppIsmane.Models
 
 
         public List<LigneAchat> LigneAchats { get; set;}
+
+
+        [NotMapped]
+        public double TotalPurchasePrice
+        {
+            get { return LigneAchats.Sum(ligne => ligne.TotalPrice); }
+        }
+
+
+
     }
 }

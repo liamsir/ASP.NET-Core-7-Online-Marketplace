@@ -1,159 +1,101 @@
-﻿<!DOCTYPE html>
+﻿
+@using MVCWebAppIsmane.Repositories.IRepositories;
+
+
+@inject ICategoryRepository CategoryRepository
+
+@{
+    string token = Context.Request.Cookies["JWT"];
+}
+
+@{
+    var categories = await CategoryRepository.GetAll();
+}
+
+
+
+<!DOCTYPE html>
 <html>
 <head>
     
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>@ViewData["Title"] - MVCWebAppIsmane</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
         <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />        
         <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-        <link rel="stylesheet" href="~/MVCWebAppIsmane.styles.css" asp-append-version="true" />
+        <link rel="stylesheet" href="~/style/header.css" asp-append-version="true" />
     
-    <!-- Meta tags, title, and CSS links -->
-    <style>
-        /* Add custom styles here */
-        /* Header styles */
-        .navbar {
-            background-color: #23J2f3e;
-            color: white;
-            padding: 10px 0;
-        }
-
-        .mine{
-            width:100%;
-        }
-
-        .navbar-brand {
-            color: white;
-            font-size: 28px;
-            font-weight: bold;
-            margin-right: 50px;
-        }
-
-        .logo-img {
-            max-width: 120px;
-            max-height: 40px;
-            margin-right: 20px;
-        }
-
-        .search-bar {
-            display: flex;
-            align-items: center;
-            flex-grow: 1;
-        }
-
-        .search-input {
-            width: 200px;
-            padding: 8px;
-            margin-right: 20px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            font-size: 14px;
-            transition: all 0.3s ease;
-        }
-
-            .search-input:focus {
-                border-color: #FF9900;
-                box-shadow: 0 0 5px rgba(255, 153, 0, 0.5);
-            }
-
-        .categories-select {
-            margin-right: 20px;
-            padding: 8px;
-            font-size: 14px;
-        }
-
-        .sign-in-btn {
-            background-color: #FF9900;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 3px;
-            color: white;
-            margin-left: 20px;
-            transition: background-color 0.3s, transform 0.2s;
-            cursor: pointer;
-            font-size: 14px;
-        }
-
-        .search-bar {
-            max-width: 500px; /* Adjust the maximum width as needed */
-            margin: 0 auto; /* Center the search bar */
-        }
-
-            .sign-in-btn:hover {
-                background-color: #FFAD33;
-                transform: scale(1.05);
-            }
-
-        .cart-icon {
-            color: white;
-            font-size: 24px;
-        }
-
-
-        .cart-icon-with-badge {
-            width: 64px; /* Set the width of the container */
-            height: 64px; /* Set the height of the container */
-            background-image: url('https://img.icons8.com/ios/50/shopping-cart--v1.png'); /* Image URL */
-            background-size: cover; /* Scale the background image */
-            position: relative; /* Positioning context for the child span */
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            position: relative;
-        }
-
-        .badge {
-            position: absolute; /* Position the badge absolutely */
-            bottom: -10px; /* Adjust the position of the badge vertically */
-            right: -15px; /* Adjust the position of the badge horizontally */
-            color: white; /* Text color of the badge */
-        }
-    </style>
+   <style>
+       .ii{
+           visibility:!important;
+       }
+   </style>
 </head>
 <body>
-    <header>
-        <nav class="navbar">
-            <div class="container">
-                <div class="row mine">
-                    <div class="col-md-3">
-                        @* <img src="your-logo.png" alt="Your Logo" class="logo-img"> *@
-                        <a href="#" class="navbar-brand">hh</a>
-                    </div>
-                    <div class="col-md-5 search-bar">
-                        <div class="input-group">
-                            <select class="form-select categories-select input-group-text rounded-start">
-                                <option selected>Choose category</option>
-                                <option value="1">Category 1</option>
-                                <option value="2">Category 2</option>
-                                <!-- Add more categories -->
-                            </select>
-                            <input type="text" class="form-control rounded-end" placeholder="Search products...">
-                            <button class="btn btn-primary" type="button">
-                                <i class="bi bi-search"></i> <!-- Use your search icon here -->
-                            </button>
-                        </div>
-                    </div>
 
 
-                    <div class="col-md-2 text-center position-relative">
 
-                        <a class="text-decoration-none text-dark" asp-controller="Product" asp-action="ViewCart">
-                            <div class="cart-icon-with-badge">
-                                    <span class="badge rounded-pill bg-danger">5</span>
-                                    @* <i class="bi bi-cart-fill"></i> *@
+
+
+    <header class="main-header">
+        <div class="container">
+            <nav class="navbar navbar-expand-lg navbar-light">
+                <a class="navbar-brand" asp-action="Index" asp-controller="Product">
+                    <img src="~/public/logoApp.jpeg" alt="MVCWebAppIsmane" class="logo-img">
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                        aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <div class="col-lg-6">
+                        <form id="search-form" asp-controller="Product" asp-action="SearchByCategory" method="get">
+                            <div class="input-group search-bar">
+                                <select id="category-select" name="categoryId" class="form-select input-group-text rounded-start"
+                                        onchange="this.style.width = null">
+                                    <option selected value="0">Choose category</option>
+                                    @foreach (var category in categories)
+                                    {
+                                        <option value="@category.Id">@category.Name</option>
+                                    }
+                                </select>
+                                <input id="search-input" name="searchTerm" type="text" class="form-control rounded-end"
+                                       placeholder="Search products..." aria-label="Search products">
+                                <button type="submit" class="btn btn-primary" aria-label="Search">
+                                    <i class="bi bi-search ii"></i>
+                                </button>
                             </div>
-                        </a>
+                        </form>
                     </div>
 
-                    
-                    <div class="col-md-2 text-end">
-                        <button class="btn sign-in-btn">Sign In</button>
-                    </div>
+                    <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                        <li class="nav-item">
+                            <a class="nav-link cart-icon-with-badge" asp-controller="Panier" asp-action="Index" aria-label="View cart">
+                                <i class="fas fa-shopping-cart fa-2x cart-icon-white" style="color: white;"></i>
+                                <span class="badge rounded-pill bg-danger">Cart</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            @* <a class="btn btn-primary sign-in-btn" asp-controller="LoginVM" asp-action="SignIn" role="button" aria-label="Sign in">Sign In</a> *@
+                            @if(token == null)
+                            {                 
+                                @* <p> => @token</p> *@
+                                <a class="btn btn-primary sign-in-btn" asp-controller="LoginVM" asp-action="SignIn" role="button" aria-label="Sign in">Sign In</a>
+                            }else
+                            {
+                                @* <p> => @token</p> *@
+                                <a class="btn btn-primary sign-in-btn" asp-controller="LoginVM" asp-action="SignIn" role="button" aria-label="Sign out">Sign Out</a>
+                            }
+                        </li>
+                    </ul>
                 </div>
-            </div>
-        </nav>
+            </nav>
+        </div>
     </header>
+
+
 
     <main role="main">
         @RenderBody()
@@ -166,6 +108,8 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/style/header.js" asp-append-version="true"></script>
+
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

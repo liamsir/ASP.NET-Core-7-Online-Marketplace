@@ -24,9 +24,17 @@ namespace MVCWebAppIsmane.Models
 
         [Required]
         [DisplayName("Product Price")]
-        public double Price { get; set; }                
-        
-        
+        public double Price { get; set; }
+
+
+        [Required]
+        [DisplayName("Product Price")]
+        [Range(10, int.MaxValue, ErrorMessage = "Quantity should be more than 10")]
+        [DefaultValue(20)]
+        public int QuantityStock { get; set; }
+
+
+
         [ValidateNever]
         [DisplayName("Product's Image")]
         public string Poster { get; set; }

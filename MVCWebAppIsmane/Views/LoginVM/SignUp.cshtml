@@ -1,0 +1,106 @@
+﻿@model Client
+
+<style>
+
+
+    /* .container {
+            width: 400px;
+            margin: 100px auto;
+            border-radius: 20px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+            background: white;
+            padding: 40px;
+        } */
+
+    .logo {
+        width: 100px;
+        height: 100px;
+        margin: 0 auto;
+        display: block;
+    }
+
+    
+    label {
+        display: block;
+        font-weight: bold;
+        color: #0072ff;
+    }
+
+    input {
+        width: 100%;
+        height: 40px;
+        border: none;
+        border-bottom: 2px solid #0072ff;
+        outline: none;
+        font-size: 18px;
+    }
+
+    .register {
+        width: 100%;
+        height: 50px;
+        border: none;
+        border-radius: 10px;
+        background: #00720f;
+        color: white;
+        font-size: 20px;
+        font-weight: bold;
+        cursor: pointer;        
+    }
+
+        button:hover {
+            background: #00c6ff;
+        }
+</style>
+
+
+
+<!-- Add Bootstrap CDN links -->
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+<div class="container">
+    <img src="~/public/login.jpg" alt="Logo" class="logo">
+
+    @* 
+        <!-- Display validation summary -->
+        <div asp-validation-summary="All" class="text-danger"></div> 
+    *@
+
+    <!-- Use the card component to create a container for the register form -->
+    <div class="card mx-auto" style="width: 18rem;">
+        <div class="card-body">
+            <h5 class="card-title text-center">Register</h5>
+            <form method="post" asp-controller="LoginVM" asp-action="Register">
+                <!-- Use the form-group and form-control classes to style the input fields and labels -->
+                <!-- Use the asp-for attribute to bind the input fields to the model properties -->
+                <div class="form-group">
+                    <label asp-for="Name">Name:</label>
+                    <input type="text" class="form-control" asp-for="Name" required>
+                    <span asp-validation-for="Name" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Email">Email:</label>
+                    <input type="email" class="form-control" asp-for="Email" required>
+                    <span asp-validation-for="Email" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Password">Password:</label>
+                    <input type="password" class="form-control" asp-for="Password" required>
+                    <span asp-validation-for="Password" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="PhoneNumber">Phone:</label>
+                    <input type="text" class="form-control" asp-for="PhoneNumber" required>
+                    <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                </div>
+                <!-- Use the btn and btn-primary classes to style the button -->
+                <button type="submit" class="btn btn-primary register">Register</button>
+            </form>
+            <!-- Use the text-center class to align the elements to the center -->
+            <div class="text-center">
+                <p>Already have an account? <a asp-controller="LoginVM" asp-action="SignIn">Sign in</a>.</p>
+            </div>
+        </div>
+    </div>
+</div>

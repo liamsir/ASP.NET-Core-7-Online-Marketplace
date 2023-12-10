@@ -1,0 +1,64 @@
+﻿@model List<Product>
+
+<div class="container">
+    <div class="row">
+        <div class="col">
+            <h2>Products</h2>
+            <form method="post" asp-controller="Achat" asp-action="BuyProducts" class="purchase-form">
+                @for (var i = 0; i < Model.Count; i++)
+                {
+                    <div class="card mb-3">
+                        <div class="row g-0">
+                            <div class="col-md-4">
+                                <img asp-append-version="true" src="@Model[i].Poster" class="img-fluid rounded-start" alt="@Model[i].Poster">
+                            </div>
+                            <div class="col-md-8">
+                                <div class="card-body">
+                                    <h5 class="card-title">@Model[i].Name</h5>
+                                    <p class="card-text">Description: @Model[i].Description</p>
+                                    <p class="card-text">Price: $@Model[i].Price</p>
+                                    <div class="input-group">
+                                        <input type="hidden" name="productIds[@i]" value="@Model[i].Id" />
+                                        <input type="number" min="1" max="50" name="quantities[@i]" class="form-control quantity-input" value="1">
+                                        <input type="hidden" name="prices[@i]" value="@Model[i].Price" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+                <div class="row">
+                    <div class="col">
+                        <h4>Total Purchase Price:</h4>
+                        <p id="total-purchase-price">0.00</p>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-success">Buy Now</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    function updateTotalPrice() {
+        var totalPrice = 0;
+        var quantities = document.getElementsByClassName('quantity-input');
+
+        for (var i = 0; i < quantities.length; i++) {
+            var quantity = parseFloat(quantities[i].value);
+            var price = parseFloat(quantities[i].nextElementSibling.value);
+            totalPrice += quantity * price;
+        }
+
+        document.getElementById('total-purchase-price').innerText = totalPrice.toFixed(2);
+    }
+
+    // Calculate total price initially when the page loads
+    window.onload = updateTotalPrice;
+
+    // Add event listeners to quantity inputs
+    var quantityInputs = document.getElementsByClassName('quantity-input');
+    for (var i = 0; i < quantityInputs.length; i++) {
+        quantityInputs[i].addEventListener('input', updateTotalPrice);
+    }
+</script>

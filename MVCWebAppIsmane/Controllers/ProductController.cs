@@ -1,8 +1,8 @@
 ﻿
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using MVCWebAppIsmane.Data;
 using MVCWebAppIsmane.Models;
+using MVCWebAppIsmane.Repositories.IRepositories;
 using Newtonsoft.Json;
 
 
@@ -11,25 +11,30 @@ namespace MVCWebAppIsmane.Controllers
 {
     public class ProductController : Controller
     {
-        private readonly DataContext _dataContext;
+        //private readonly DataContext _dataContext;
+        private readonly ILogger<ProductController> _logger;
+        private readonly IProductRepository _productRepository;
+        private readonly ICategoryRepository _categoryRepository;
         private readonly IWebHostEnvironment _webHostEnvironment;
 
-        public ProductController(DataContext dataContext, IWebHostEnvironment webHostEnvironment)
+        public ProductController(ILogger<ProductController> logger, ICategoryRepository categoryRepository , IProductRepository productRepository, IWebHostEnvironment webHostEnvironment)
         {
-            _dataContext = dataContext;
+            _logger = logger;
+            _categoryRepository = categoryRepository;
+            _productRepository = productRepository;
             _webHostEnvironment = webHostEnvironment;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            var products = _dataContext.Products.ToList();
+            var products = await _productRepository.GetAll();
             return View(products);
         }
 
-        public IActionResult Create()
-        {
-            var categories = _dataContext.Categories.ToList(); // Replace with your data retrieval logic.
 
+        public async Task<IActionResult> Create()
+        {
+            var categories = await _categoryRepository.GetAll(); // Assuming GetAll() retrieves all categories
             ViewBag.Categories = new SelectList(categories, "Id", "Name"); // Populate ViewBag with the list of categories.
             return View();
         }
@@ -53,11 +58,10 @@ namespace MVCWebAppIsmane.Controllers
                     {
                         await posterFile.CopyToAsync(fileStream);
                     }   
-                    model.Poster = "pics/" + uniqueFileName;
+                    model.Poster = "~/pics/" + uniqueFileName;
                 }
 
-                _dataContext.Products.Add(model);
-                _dataContext.SaveChanges();
+                _productRepository.Create(model);
                 return RedirectToAction("Index");
 
                 //whateer you want
@@ -69,16 +73,16 @@ namespace MVCWebAppIsmane.Controllers
 
 
 
-        public IActionResult Edit(int? Id)
+        public async Task<IActionResult> Edit(int? Id)
         {
             if (Id == null || Id == 0)
             {
                 return NotFound();
             }
-            var categories = _dataContext.Categories.ToList(); // Replace with your data retrieval logic.
 
+            var categories = await _categoryRepository.GetAll();
 
-            Product? product = _dataContext.Products.FirstOrDefault(u => u.Id == Id);
+            var product = await _productRepository.GetById(Id);
 
             if (product == null)
             {
@@ -90,13 +94,18 @@ namespace MVCWebAppIsmane.Controllers
         }
 
 
+
+
+
+
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(Product model, IFormFile posterFile)
         {
             if (ModelState.IsValid)
             {
-                Product? existingProduct = _dataContext.Products.FirstOrDefault(u => u.Id == model.Id);
+                Product? existingProduct = await _productRepository.GetById(model.Id);
                 if (existingProduct == null)
                 {
                     return NotFound();
@@ -104,7 +113,6 @@ namespace MVCWebAppIsmane.Controllers
 
                 if (posterFile != null && posterFile.Length > 0)
                 {
-                    // A new image has been uploaded, so proceed with the new image.
                     string uniqueFileName = Guid.NewGuid().ToString() + "_" + posterFile.FileName;
                     string uploadFolder = Path.Combine(_webHostEnvironment.WebRootPath, "pics");
                     string filePath = Path.Combine(uploadFolder, uniqueFileName);
@@ -114,7 +122,6 @@ namespace MVCWebAppIsmane.Controllers
                         await posterFile.CopyToAsync(fileStream);
                     }
 
-                    // Remove the old image (if it exists) and update with the new one.
                     if (!string.IsNullOrEmpty(existingProduct.Poster))
                     {
                         string oldImagePath = Path.Combine(_webHostEnvironment.WebRootPath, existingProduct.Poster);
@@ -124,33 +131,31 @@ namespace MVCWebAppIsmane.Controllers
                         }
                     }
 
-                    model.Poster = "pics/" + uniqueFileName;
+                    model.Poster = "~/pics/" + uniqueFileName;
                 }
                 else
                 {
-                    // No new image uploaded, retain the existing image.
                     model.Poster = existingProduct.Poster;
                 }
 
-                // Update other properties and save the product.
                 existingProduct.Name = model.Name;
                 existingProduct.Description = model.Description;
                 existingProduct.Price = model.Price;
                 existingProduct.IdCategory = model.IdCategory;
                 existingProduct.Poster = model.Poster;
 
-                _dataContext.SaveChanges();
+                await _productRepository.Update(existingProduct);
+
                 return RedirectToAction("Index");
             }
 
+            // Handle invalid model state here
             return View(model);
         }
 
 
 
-
-
-
+        [HttpPost]
         public IActionResult AddToCart(int productId)
         {
             // Retrieve the cart items from cookies
@@ -158,11 +163,31 @@ namespace MVCWebAppIsmane.Controllers
             var existingCart = Request.Cookies["CartItems"];
             if (!string.IsNullOrEmpty(existingCart))
             {
-                cartItems = JsonConvert.DeserializeObject<List<int>>(existingCart);
+                try
+                {
+                    cartItems = JsonConvert.DeserializeObject<List<int>>(existingCart);
+
+                }
+                catch (JsonReaderException ex)
+                {
+                    // Handle the exception or log it
+                    // Example: Log the exception message
+                    Console.WriteLine("Error deserializing JSON: " + ex.Message);
+                }
+                
+            }
+
+            foreach (int item in cartItems)
+            {
+                _logger.LogInformation("=================>\t" + item);
             }
 
             // Add the selected product to the cart
-            cartItems.Add(productId);
+            try
+            {
+                cartItems.Add(productId);
+            }
+            catch (JsonReaderException ex) { Console.WriteLine("Error deserializing JSON: " + ex.Message); }
 
             // Save the updated cart items in cookies
             string cartJson = JsonConvert.SerializeObject(cartItems);
@@ -170,38 +195,64 @@ namespace MVCWebAppIsmane.Controllers
             {
                 Expires = DateTime.Now.AddDays(7) // Adjust the expiration time as needed
             };
-            Response.Cookies.Append("CartItems", cartJson+"smen", option);
+            Response.Cookies.Append("CartItems", cartJson, option);
 
             // Redirect or return a response as needed
             return RedirectToAction("Index", "Product");
         }
 
 
-        public IActionResult ViewCart()
+        public async Task<IActionResult> ViewCart()
         {
-
             var existingCart = Request.Cookies["CartItems"];
 
             List<int> cartItems = new List<int>();
             if (!string.IsNullOrEmpty(existingCart))
             {
-                cartItems = JsonConvert.DeserializeObject<List<int>>(existingCart);
+                try
+                {
+                    cartItems = JsonConvert.DeserializeObject<List<int>>(existingCart);
+                }
+                catch (JsonReaderException ex)
+                {
+                    // Handle the exception or log it
+                    // Example: Log the exception message
+                    Console.WriteLine("Error deserializing JSON: " + ex.Message);
+                }
             }
 
-            // Use the cart items to retrieve products from your data store
-            // Replace this logic with how you retrieve products based on their IDs
-
-
-            // Replace with your logic (Retrieve the product list with ids are in cartItems list
-            //List<Product> productsInCart = GetProductsInCart(cartItems);
-
-            // Pass the products in the cart as a model to the Index view
-            //return View("Index", productsInCart);
-            return View("Index", null);
+            // Use the cart items to retrieve products from your repository
+            var productInCart = await _productRepository.Get(p => cartItems.Contains(p.Id));
+            return View("Index", productInCart);
         }
 
 
 
+        public async Task<IActionResult> SearchByCategory(int categoryId, string searchTerm)
+        {
+            IEnumerable<Product> products;
+
+            if (categoryId == 0) // Assuming 0 represents "Choose category"
+            {
+                // Display all products if no specific category is selected
+                products = await _productRepository.GetAll();
+            }
+            else
+            {
+                if (string.IsNullOrWhiteSpace(searchTerm))
+                {
+                    // Search only by category when searchTerm is empty
+                    products = await _productRepository.Get(p => p.IdCategory == categoryId);
+                }
+                else
+                {
+                    // Search by category and name when searchTerm is provided
+                    products = await _productRepository.Get(p => p.IdCategory == categoryId && p.Name.Contains(searchTerm));
+                }
+            }
+
+            return View("Index", products);
+        }
 
     }
 }

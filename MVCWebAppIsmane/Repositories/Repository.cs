@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 using MVCWebAppIsmane.Data;
+using MVCWebAppIsmane.Repositories.IRepositories;
 
 namespace MVCWebAppIsmane.Repositories
 {
@@ -18,7 +19,7 @@ namespace MVCWebAppIsmane.Repositories
             return await _context.Set<T>().ToListAsync();
         }
 
-        public async Task<T> GetByIdAsync(int id)
+        public async Task<T> GetById(int? id)
         {
             return await _context.Set<T>().FindAsync(id);
         }
