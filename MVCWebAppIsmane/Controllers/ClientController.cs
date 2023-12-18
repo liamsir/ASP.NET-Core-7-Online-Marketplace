@@ -4,14 +4,14 @@ using MVCWebAppIsmane.Repositories.IRepositories;
 
 namespace MVCWebAppIsmane.Controllers
 {
-    public class ClientController : Controller
+    public class UserController : Controller
     {
 
-        private readonly IClientRepository _clientRepository;
+        private readonly IUserRepository _UserRepository;
 
-        public ClientController(IClientRepository clientRepository)
+        public UserController(IUserRepository UserRepository)
         {
-            _clientRepository = clientRepository;
+            _UserRepository = UserRepository;
         }
 
         public IActionResult Index()

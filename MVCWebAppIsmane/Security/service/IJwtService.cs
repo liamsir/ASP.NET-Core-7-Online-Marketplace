@@ -2,7 +2,7 @@
 {
     public interface IJwtService
     {
-        public string GenerateJwtToken(string email);// You can pass other relevant user data here
+        public string GenerateJwtToken(string email,string role);// You can pass other relevant user data here
     }
 
 }

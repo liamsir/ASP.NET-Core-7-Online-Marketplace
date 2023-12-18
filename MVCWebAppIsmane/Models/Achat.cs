@@ -8,22 +8,22 @@ namespace MVCWebAppIsmane.Models
 
         public int Id { get; set; }
 
-        [ForeignKey(nameof(Client))]
-        public int IdClient { get; set; } = 1;
+        [ForeignKey(nameof(User))]
+        public string IdUser { get; set; }
 
         [ValidateNever]
-        public Client Client { get; init; }
+        public User User { get; init; }
        
 
 
-        public List<LigneAchat> LigneAchats { get; set;}
+        public List<LigneAchat> LigneAchats { get; set; }
 
-
-        [NotMapped]
-        public double TotalPurchasePrice
-        {
-            get { return LigneAchats.Sum(ligne => ligne.TotalPrice); }
-        }
+        /*
+                [NotMapped]
+                public double TotalPurchasePrice
+                {
+                    get { return LigneAchats.Sum(ligne => ligne.TotalPrice); }
+                }*/
 
 
 

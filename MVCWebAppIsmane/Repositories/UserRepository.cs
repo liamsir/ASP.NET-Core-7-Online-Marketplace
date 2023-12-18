@@ -6,9 +6,9 @@ using System;
 
 namespace MVCWebAppIsmane.Repositories
 {
-    public class ClientRepository : Repository<Client> , IClientRepository
+    public class UserRepository : Repository<User> , IUserRepository
     {
-        public ClientRepository(DataContext context) : base(context)
+        public UserRepository(DataContext context) : base(context)
         {
 
         }

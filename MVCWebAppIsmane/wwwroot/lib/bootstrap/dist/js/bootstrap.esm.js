@@ -141,7 +141,7 @@ const typeCheckConfig = (componentName, config, configTypes) => {
 };
 
 const isVisible = element => {
-  if (!isElement(element) || element.getClientRects().length === 0) {
+  if (!isElement(element) || element.getUserRects().length === 0) {
     return false;
   }
 
@@ -969,7 +969,7 @@ const Manipulator = {
   },
 
   offset(element) {
-    const rect = element.getBoundingClientRect();
+    const rect = element.getBoundingUserRect();
     return {
       top: rect.top + window.pageYOffset,
       left: rect.left + window.pageXOffset
@@ -1284,20 +1284,20 @@ class Carousel extends BaseComponent {
   _addTouchEventListeners() {
     const start = event => {
       if (this._pointerEvent && (event.pointerType === POINTER_TYPE_PEN || event.pointerType === POINTER_TYPE_TOUCH)) {
-        this.touchStartX = event.clientX;
+        this.touchStartX = event.UserX;
       } else if (!this._pointerEvent) {
-        this.touchStartX = event.touches[0].clientX;
+        this.touchStartX = event.touches[0].UserX;
       }
     };
 
     const move = event => {
       // ensure swiping with one touch and not pinching
-      this.touchDeltaX = event.touches && event.touches.length > 1 ? 0 : event.touches[0].clientX - this.touchStartX;
+      this.touchDeltaX = event.touches && event.touches.length > 1 ? 0 : event.touches[0].UserX - this.touchStartX;
     };
 
     const end = event => {
       if (this._pointerEvent && (event.pointerType === POINTER_TYPE_PEN || event.pointerType === POINTER_TYPE_TOUCH)) {
-        this.touchDeltaX = event.clientX - this.touchStartX;
+        this.touchDeltaX = event.UserX - this.touchStartX;
       }
 
       this._handleSwipe();
@@ -1779,7 +1779,7 @@ class Collapse extends BaseComponent {
 
     const dimension = this._getDimension();
 
-    this._element.style[dimension] = `${this._element.getBoundingClientRect()[dimension]}px`;
+    this._element.style[dimension] = `${this._element.getBoundingUserRect()[dimension]}px`;
     reflow(this._element);
 
     this._element.classList.add(CLASS_NAME_COLLAPSING);
@@ -2117,9 +2117,9 @@ class Dropdown extends BaseComponent {
     };
     typeCheckConfig(NAME$9, config, this.constructor.DefaultType);
 
-    if (typeof config.reference === 'object' && !isElement(config.reference) && typeof config.reference.getBoundingClientRect !== 'function') {
-      // Popper virtual elements require a getBoundingClientRect method
-      throw new TypeError(`${NAME$9.toUpperCase()}: Option "reference" provided type "object" without a required "getBoundingClientRect" method.`);
+    if (typeof config.reference === 'object' && !isElement(config.reference) && typeof config.reference.getBoundingUserRect !== 'function') {
+      // Popper virtual elements require a getBoundingUserRect method
+      throw new TypeError(`${NAME$9.toUpperCase()}: Option "reference" provided type "object" without a required "getBoundingUserRect" method.`);
     }
 
     return config;
@@ -2396,7 +2396,7 @@ class ScrollBarHelper {
 
   getWidth() {
     // https://developer.mozilla.org/en-US/docs/Web/API/Window/innerWidth#usage_notes
-    const documentWidth = document.documentElement.clientWidth;
+    const documentWidth = document.documentElement.UserWidth;
     return Math.abs(window.innerWidth - documentWidth);
   }
 
@@ -2424,7 +2424,7 @@ class ScrollBarHelper {
     const scrollbarWidth = this.getWidth();
 
     const manipulationCallBack = element => {
-      if (element !== this._element && window.innerWidth > element.clientWidth + scrollbarWidth) {
+      if (element !== this._element && window.innerWidth > element.UserWidth + scrollbarWidth) {
         return;
       }
 
@@ -3026,7 +3026,7 @@ class Modal extends BaseComponent {
       scrollHeight,
       style
     } = this._element;
-    const isModalOverflowing = scrollHeight > document.documentElement.clientHeight; // return if the following background transition hasn't yet completed
+    const isModalOverflowing = scrollHeight > document.documentElement.UserHeight; // return if the following background transition hasn't yet completed
 
     if (!isModalOverflowing && style.overflowY === 'hidden' || classList.contains(CLASS_NAME_STATIC)) {
       return;
@@ -3055,7 +3055,7 @@ class Modal extends BaseComponent {
 
 
   _adjustDialog() {
-    const isModalOverflowing = this._element.scrollHeight > document.documentElement.clientHeight;
+    const isModalOverflowing = this._element.scrollHeight > document.documentElement.UserHeight;
 
     const scrollbarWidth = this._scrollBar.getWidth();
 
@@ -4395,7 +4395,7 @@ class ScrollSpy extends BaseComponent {
       const target = targetSelector ? SelectorEngine.findOne(targetSelector) : null;
 
       if (target) {
-        const targetBCR = target.getBoundingClientRect();
+        const targetBCR = target.getBoundingUserRect();
 
         if (targetBCR.width || targetBCR.height) {
           return [Manipulator[offsetMethod](target).top + offsetBase, targetSelector];
@@ -4435,7 +4435,7 @@ class ScrollSpy extends BaseComponent {
   }
 
   _getOffsetHeight() {
-    return this._scrollElement === window ? window.innerHeight : this._scrollElement.getBoundingClientRect().height;
+    return this._scrollElement === window ? window.innerHeight : this._scrollElement.getBoundingUserRect().height;
   }
 
   _process() {

@@ -1,0 +1,70 @@
+﻿    
+    <style>
+        /* Add your custom CSS styles here */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .logo {
+            display: block;
+            margin: 0 auto;
+            width: 200px;
+        }
+
+        .message {
+            text-align: center;
+            font-size: 24px;
+            color: #333;
+            margin-top: 20px;
+        }
+
+        .suggestion {
+            text-align: center;
+            font-size: 18px;
+            color: #666;
+            margin-top: 10px;
+        }
+
+        .links {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+            .links a {
+                display: inline-block;
+                padding: 10px 20px;
+                border: 1px solid #ccc;
+                border-radius: 5px;
+                text-decoration: none;
+                color: #333;
+                margin: 0 10px;
+            }
+
+                .links a:hover {
+                    background-color: #ccc;
+                }
+    </style>
+<body>
+    <div class="container">
+        <img src="~/public/denied.jpeg" alt="Logo" class="logo">
+        <p class="message">@ViewData["ErrorMessage"]</p>
+        <p class="suggestion">Please log in with your account or contact the administrator for assistance.</p>
+        <div class="links">
+
+           
+            <a asp-action="Index" asp-controller="Product">Home</a>
+        </div>
+    </div>
+</body>
+</html>

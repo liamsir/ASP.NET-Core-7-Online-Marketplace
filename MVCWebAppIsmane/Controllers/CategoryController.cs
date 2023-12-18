@@ -1,16 +1,14 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using MVCWebAppIsmane.Data;
-using MVCWebAppIsmane.Repositories;
+using MVCWebAppIsmane.Repositories.IRepositories;
 
 namespace MVCWebAppIsmane.Controllers
 {
     public class CategoryController : Controller
     {
 
-        private readonly CategoryRepository _categoryRepository;
+        private readonly ICategoryRepository _categoryRepository;
 
-        public CategoryController(CategoryRepository categoryRepository)
+        public CategoryController(ICategoryRepository categoryRepository)
         {
             _categoryRepository = categoryRepository;
         }
@@ -19,6 +17,9 @@ namespace MVCWebAppIsmane.Controllers
             var categories = _categoryRepository.GetAll();
             return View(categories);
         }
+
+        //IF WE WANNA DO ALL CATEGORIES CRUD
+        //TODO
 
     }
 }

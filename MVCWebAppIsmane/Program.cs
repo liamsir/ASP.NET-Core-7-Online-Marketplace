@@ -1,8 +1,10 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using MVCWebAppIsmane.Data;
+using MVCWebAppIsmane.Models;
 using MVCWebAppIsmane.Repositories;
 using MVCWebAppIsmane.Repositories.IRepositories;
 using MVCWebAppIsmane.Security.config;
@@ -16,13 +18,15 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<DataContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("ismane")));
 
+
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
-builder.Services.AddScoped<IClientRepository, ClientRepository>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IAchatRepository, AchatRepository>();
 builder.Services.AddScoped<ILigneAchatRepository, LigneAchatRepository>();
 builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
+builder.Services.AddResponseCaching();
 
 
 
@@ -32,6 +36,15 @@ var secretKey = Environment.GetEnvironmentVariable("JWT_SECRET_KEY");
 
 Console.WriteLine($"JWT_SECRET_KEY: {secretKey}");
 builder.Services.Configure<JwtSettings>(jwtSettings); // Configure JwtSettings as a strongly typed class
+
+builder.Services.AddIdentity<User, IdentityRole>(options =>
+{
+    
+})
+    .AddEntityFrameworkStores<DataContext>()
+    .AddDefaultTokenProviders();
+
+
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -51,11 +64,27 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 
 
-
 builder.Services.AddAuthorization();
 
 
 var app = builder.Build();
+
+
+/*using (var scope = app.Services.CreateScope())
+{
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+
+    await RoleInitializer.SeedRoles(roleManager);
+
+    // Additional setup if needed
+    *//*var host = null;
+    host = app.Services.GetRequiredService<IHostApplicationLifetime>();
+    host.Start();*/
+    /*
+         await app.RunAsync();
+    *//*
+}*/
+
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
@@ -78,4 +107,86 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Product}/{action=Index}/{id?}");
 
+
+
 app.Run();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+public static class RoleInitializer
+{
+    public static async Task SeedRoles(RoleManager<IdentityRole> roleManager)
+    {
+        string[] roleNames = { "Admin", "Customer" };
+
+        foreach (var roleName in roleNames)
+        {
+            if (!await roleManager.RoleExistsAsync(roleName))
+            {
+                await roleManager.CreateAsync(new IdentityRole(roleName));
+            }
+        }
+    }
+}
+
+

@@ -35,8 +35,9 @@ namespace MVCWebAppIsmane.Models
 
 
 
-        [ValidateNever]
+        
         [DisplayName("Product's Image")]
+        [ValidateNever]
         public string Poster { get; set; }
         // add category property?
 

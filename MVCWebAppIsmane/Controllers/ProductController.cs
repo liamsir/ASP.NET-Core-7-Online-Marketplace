@@ -1,42 +1,94 @@
 ﻿
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.Extensions.Caching.Memory;
+using Microsoft.IdentityModel.Tokens;
 using MVCWebAppIsmane.Models;
 using MVCWebAppIsmane.Repositories.IRepositories;
 using Newtonsoft.Json;
-
-
+using System.Security.Claims;
 
 namespace MVCWebAppIsmane.Controllers
 {
     public class ProductController : Controller
     {
-        //private readonly DataContext _dataContext;
+        
+        private readonly IMemoryCache _memoryCache;
         private readonly ILogger<ProductController> _logger;
         private readonly IProductRepository _productRepository;
         private readonly ICategoryRepository _categoryRepository;
         private readonly IWebHostEnvironment _webHostEnvironment;
 
-        public ProductController(ILogger<ProductController> logger, ICategoryRepository categoryRepository , IProductRepository productRepository, IWebHostEnvironment webHostEnvironment)
+        public ProductController(IMemoryCache memoryCache, ILogger<ProductController> logger, ICategoryRepository categoryRepository , IProductRepository productRepository, IWebHostEnvironment webHostEnvironment)
         {
+            _memoryCache = memoryCache;
             _logger = logger;
             _categoryRepository = categoryRepository;
             _productRepository = productRepository;
             _webHostEnvironment = webHostEnvironment;
         }
 
+
+
         public async Task<IActionResult> Index()
         {
-            var products = await _productRepository.GetAll();
+            _logger.LogInformation($"==============> Open the app at {DateTime.UtcNow}");
+            bool exist = _memoryCache.TryGetValue("Products", out IEnumerable<Product> products);
+            if (!exist)
+            {
+                _logger.LogInformation("============> Products not found in cache. Fetching from repository...");
+
+                products = await _productRepository.GetAll();
+
+                if (products != null && products.Any())
+                {
+                    _memoryCache.Set("Products", products, TimeSpan.FromMinutes(10)); // Cache for 10 minutes                
+                    _logger.LogInformation("=========> Products stored in cache.");
+                }
+                else
+                {
+                    _logger.LogWarning("===================> Products retrieved from repository are null or empty.");
+                }
+            }
+            else
+            {
+                _logger.LogInformation("====================> Products retrieved from cache.");
+            }
+
             return View(products);
         }
 
 
+
+
         public async Task<IActionResult> Create()
         {
-            var categories = await _categoryRepository.GetAll(); // Assuming GetAll() retrieves all categories
-            ViewBag.Categories = new SelectList(categories, "Id", "Name"); // Populate ViewBag with the list of categories.
+            string token = Request.Cookies["JWT"];
+            if(token == null)
+                return RedirectToAction("SignIn", "Auth");
+            var handler = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler();
+            var jsonToken = handler.ReadToken(token) as System.IdentityModel.Tokens.Jwt.JwtSecurityToken;
+            string roleClaim = jsonToken?.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
+            if (roleClaim == "Customer")
+            {
+                string error = "You do not have permission to perform this action.";
+                return View("Error", new { message = error });
+                //TEMPORARILY 
+                //SHOULD REDIRECT THE USER TO PAGE WITH MESSAGE NOT ACCESBILE
+            }
+            if (!_memoryCache.TryGetValue("Categories", out IEnumerable<Category> categories))
+            {
+                categories = await _categoryRepository.GetAll();
+                _memoryCache.Set("Categories", categories, TimeSpan.FromMinutes(10));
+            }
+
+                _logger.LogInformation("=========> categories got retrieved ");
+                ViewBag.Categories = new SelectList(categories, "Id", "Name");
             return View();
+            //}
+
+            //return RedirectToAction("Index","Home");
         }
 
 
@@ -45,7 +97,11 @@ namespace MVCWebAppIsmane.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Product model, IFormFile posterFile)
+        public async Task<IActionResult> Create(Product model,
+                                        IFormFile posterFile,
+                                        string? categoryName,
+                                        string? categoryDesc
+                                        )
         {
             if (ModelState.IsValid)
             {
@@ -57,24 +113,65 @@ namespace MVCWebAppIsmane.Controllers
                     using (var fileStream = new FileStream(filePath, FileMode.Create))
                     {
                         await posterFile.CopyToAsync(fileStream);
-                    }   
+                    }
                     model.Poster = "~/pics/" + uniqueFileName;
                 }
 
-                _productRepository.Create(model);
-                return RedirectToAction("Index");
+                if (!categoryName.IsNullOrEmpty())
+                {
+                    Category category = new Category();
+                    category.Name = categoryName;
+                    category.Description = categoryDesc;
+                    await _categoryRepository.Create(category);
+                    model.IdCategory = category.Id;
+                }
 
-                //whateer you want
+                await _productRepository.Create(model);
+                _logger.LogInformation("=========> Product created " + model);
+
+                // Update the product list in the cache
+                bool exist = _memoryCache.TryGetValue("Products", out IEnumerable<Product> products);
+                if (exist)
+                {
+                    // Add the newly created product to the cached list
+                    List<Product> updatedProducts = products.ToList();
+                    updatedProducts.Add(model);
+                    _memoryCache.Set("Products", updatedProducts, TimeSpan.FromMinutes(10));
+                    _logger.LogInformation("Product added to cache.");
+                }
+                else
+                {
+                    _logger.LogWarning("Products not found in cache. No update performed.");
+                }
+
+                return RedirectToAction("Index");
             }
 
-            return View(model);        
+            return View(model);
         }
 
 
+        public async Task<IActionResult> Error(string message)
+        {
+            ViewData["ErrorMessage"] = message;
+            return View();
+        }
 
 
         public async Task<IActionResult> Edit(int? Id)
         {
+            var token = Request.Cookies["JWT"];
+
+            var handler = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler();
+            var jsonToken = handler.ReadToken(token) as System.IdentityModel.Tokens.Jwt.JwtSecurityToken;
+            var roleClaim = jsonToken?.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
+            if (roleClaim == "Customer")
+            {
+                string error =  "You do not have permission to perform this action.";
+                return View("Error", new { message = error });            
+                
+            }
+
             if (Id == null || Id == 0)
             {
                 return NotFound();
@@ -92,8 +189,6 @@ namespace MVCWebAppIsmane.Controllers
             ViewBag.Categories = new SelectList(categories, "Id", "Name");
             return View(product);
         }
-
-
 
 
 
@@ -124,7 +219,7 @@ namespace MVCWebAppIsmane.Controllers
 
                     if (!string.IsNullOrEmpty(existingProduct.Poster))
                     {
-                        string oldImagePath = Path.Combine(_webHostEnvironment.WebRootPath, existingProduct.Poster);
+                        string oldImagePath = Path.Combine(_webHostEnvironment.WebRootPath, "pics", Path.GetFileName(existingProduct.Poster));
                         if (System.IO.File.Exists(oldImagePath))
                         {
                             System.IO.File.Delete(oldImagePath);
@@ -138,6 +233,7 @@ namespace MVCWebAppIsmane.Controllers
                     model.Poster = existingProduct.Poster;
                 }
 
+                // Update other properties
                 existingProduct.Name = model.Name;
                 existingProduct.Description = model.Description;
                 existingProduct.Price = model.Price;
@@ -145,8 +241,22 @@ namespace MVCWebAppIsmane.Controllers
                 existingProduct.Poster = model.Poster;
 
                 await _productRepository.Update(existingProduct);
+                _logger.LogInformation("=========> Product get updated " + existingProduct);
 
-                return RedirectToAction("Index");
+                // Update the product list in the cache
+                bool exist = _memoryCache.TryGetValue("Products", out IEnumerable<Product> products);
+                if (exist)
+                {
+                    IEnumerable<Product> updatedProducts = products.Select(p => p.Id == existingProduct.Id ? existingProduct : p);
+                    _memoryCache.Set("Products", updatedProducts, TimeSpan.FromMinutes(10));
+                    _logger.LogInformation("Product updated in cache.");
+                }
+                else
+                {
+                    _logger.LogWarning("Products not found in cache. No update performed.");
+                }
+
+                return RedirectToAction("Index"); return RedirectToAction("Index", "Product");
             }
 
             // Handle invalid model state here
@@ -155,104 +265,120 @@ namespace MVCWebAppIsmane.Controllers
 
 
 
-        [HttpPost]
-        public IActionResult AddToCart(int productId)
-        {
-            // Retrieve the cart items from cookies
-            List<int> cartItems = new List<int>();
-            var existingCart = Request.Cookies["CartItems"];
-            if (!string.IsNullOrEmpty(existingCart))
-            {
-                try
-                {
-                    cartItems = JsonConvert.DeserializeObject<List<int>>(existingCart);
-
-                }
-                catch (JsonReaderException ex)
-                {
-                    // Handle the exception or log it
-                    // Example: Log the exception message
-                    Console.WriteLine("Error deserializing JSON: " + ex.Message);
-                }
-                
-            }
-
-            foreach (int item in cartItems)
-            {
-                _logger.LogInformation("=================>\t" + item);
-            }
-
-            // Add the selected product to the cart
-            try
-            {
-                cartItems.Add(productId);
-            }
-            catch (JsonReaderException ex) { Console.WriteLine("Error deserializing JSON: " + ex.Message); }
-
-            // Save the updated cart items in cookies
-            string cartJson = JsonConvert.SerializeObject(cartItems);
-            CookieOptions option = new CookieOptions
-            {
-                Expires = DateTime.Now.AddDays(7) // Adjust the expiration time as needed
-            };
-            Response.Cookies.Append("CartItems", cartJson, option);
-
-            // Redirect or return a response as needed
-            return RedirectToAction("Index", "Product");
-        }
 
 
-        public async Task<IActionResult> ViewCart()
-        {
-            var existingCart = Request.Cookies["CartItems"];
 
-            List<int> cartItems = new List<int>();
-            if (!string.IsNullOrEmpty(existingCart))
-            {
-                try
-                {
-                    cartItems = JsonConvert.DeserializeObject<List<int>>(existingCart);
-                }
-                catch (JsonReaderException ex)
-                {
-                    // Handle the exception or log it
-                    // Example: Log the exception message
-                    Console.WriteLine("Error deserializing JSON: " + ex.Message);
-                }
-            }
 
-            // Use the cart items to retrieve products from your repository
-            var productInCart = await _productRepository.Get(p => cartItems.Contains(p.Id));
-            return View("Index", productInCart);
-        }
+
+
+
+
+
+
 
 
 
         public async Task<IActionResult> SearchByCategory(int categoryId, string searchTerm)
         {
-            IEnumerable<Product> products;
-
-            if (categoryId == 0) // Assuming 0 represents "Choose category"
+           
+            // TEST IF THE CATEGORY IS IN CACHE
+            string cacheKey = $"SearchResult_{categoryId}";
+            if (!_memoryCache.TryGetValue(cacheKey, out IEnumerable<Product> products))
             {
-                // Display all products if no specific category is selected
-                products = await _productRepository.GetAll();
-            }
-            else
-            {
-                if (string.IsNullOrWhiteSpace(searchTerm))
+                if (categoryId == 0) // Assuming 0 represents "Choose category"
                 {
-                    // Search only by category when searchTerm is empty
-                    products = await _productRepository.Get(p => p.IdCategory == categoryId);
+                    // Display all products if no specific category is selected
+                    products = await _productRepository.GetAll();
                 }
                 else
                 {
-                    // Search by category and name when searchTerm is provided
-                    products = await _productRepository.Get(p => p.IdCategory == categoryId && p.Name.Contains(searchTerm));
+                    if (string.IsNullOrWhiteSpace(searchTerm))
+                    {
+                        // Search only by category when searchTerm is empty
+                        products = await _productRepository.Get(p => p.IdCategory == categoryId);
+                    }
+                    else
+                    {
+                        // Search by category and name when searchTerm is provided
+                        products = await _productRepository.Get(p => p.IdCategory == categoryId && p.Name.Contains(searchTerm));
+                    }
                 }
-            }
 
+                // Cache the products with a specific expiration time
+                _memoryCache.Set(cacheKey, products, TimeSpan.FromMinutes(10)); // Cache for 10 minutes
+            }
+            _logger.LogInformation("====>products with category => "+categoryId + " and name => "+searchTerm +"get retrieve");
             return View("Index", products);
         }
+
+
+
+
+
+
+
+
+
+
+
+
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Delete(int? prdId)
+        {
+            if (prdId == null || prdId == 0)
+                return NotFound();
+
+            Product prdFound = await _productRepository.GetById(prdId);
+            if (prdFound == null)
+                return Json(new { success = false, message = "Error during the suppression" });
+
+            string posterFileName = Path.GetFileName(prdFound.Poster);
+
+            var picsFolder = "pics"; // Your image folder name
+            var webRootPath = _webHostEnvironment.WebRootPath;
+            var oldPath = Path.Combine(webRootPath, picsFolder, posterFileName);
+
+            if (System.IO.File.Exists(oldPath))
+            {
+                _logger.LogInformation("------> Removing Poster");
+                System.IO.File.Delete(oldPath);
+            }
+            else
+            {
+                _logger.LogError("------> Poster NOT FOUND");
+            }
+
+            // Remove the product from the cache
+            bool exist = _memoryCache.TryGetValue("Products", out IEnumerable<Product> products);
+            if (exist)
+            {
+                // If the product list is in the cache, remove the deleted product
+                IEnumerable<Product> updatedProducts = products.Where(p => p.Id != prdId).ToList();
+
+                // Check if the count changed to ensure the product was removed
+                if (updatedProducts.Count() != products.Count())
+                {
+                    _memoryCache.Set("Products", updatedProducts, TimeSpan.FromMinutes(10));
+                }
+                else
+                {
+                    // If the count remains the same, the product might not have been found in the cache
+                    _logger.LogWarning("Product not found in cache. No update performed.");
+                }
+            }
+            else
+            {
+                _logger.LogWarning("Products not found in cache. No update performed.");
+            }
+
+            await _productRepository.Delete(prdFound);
+            return RedirectToAction("Index");
+        }
+
+
+
 
     }
 }

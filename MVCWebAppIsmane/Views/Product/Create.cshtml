@@ -1,46 +1,129 @@
-﻿@model Product
+﻿@model Product;
 
-<h2 class="text-center">Create Product</h2>
+<style>
+    .custom-bg {
+        background-color: #f8f9fa;
+        border-radius: 15px;
+        padding: 40px;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .custom-form-label {
+        color: #495057;
+        font-weight: bold;
+    }
+
+    .custom-input {
+        border: 1px solid #ced4da;
+        border-radius: 8px;
+        padding: 12px;
+        width: 100%;
+        margin-bottom: 20px;
+    }
+
+    .custom-select {
+        border: 1px solid #ced4da;
+        border-radius: 8px;
+        padding: 12px;
+        width: 100%;
+        margin-bottom: 20px;
+    }
+
+    .custom-primary-btn {
+        background-color: #007bff;
+        border-color: #007bff;
+        border-radius: 8px;
+        padding: 14px 24px;
+        transition: background-color 0.3s ease;
+        width: 100%;
+    }
+
+    .custom-primary-btn:hover {
+        background-color: #0056b3;
+    }
+
+    .illustration {
+        max-width: 100%;
+        height: auto;
+    }
+</style>
 
 <div class="container mt-4">
     <div class="row justify-content-center">
         <div class="col-md-6">
-            <form asp-controller="Product" asp-action="Create" method="post" enctype="multipart/form-data">
-                <div class="form-group">
-                    <label asp-for="Name">Product Name</label>
-                    <input asp-for="Name" class="form-control" />
-                    <span asp-validation-for="Name" class="text-danger"></span>
+            <div class="card shadow-lg custom-bg">
+                <div class="card-body">
+                    @* <img src="https://www.elap.co.uk/wp-content/uploads/2019/04/new-product.jpg" alt="Illustration" class="mb-4 illustration"> *@
+                    @* <img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fimage.freepik.com%2Ffree-icon%2Fnew-products-label_318-56289.jpg&f=1&nofb=1&ipt=ef4035436377081118aa8a8142e8a78f90811b65013da51cb0f7bd204370e198&ipo=images" alt="Illustration" class="mb-4 illustration"> *@
+                    <img src="~/public/new.png" alt="Illustration" class="mb-4 illustration">
+
+                    <form asp-controller="Product" asp-action="Create" method="post" enctype="multipart/form-data">
+                        <label asp-for="Name" class="form-label custom-form-label">Product Name</label>
+                        <input asp-for="Name" class="form-control custom-input" />
+
+                        <label asp-for="Description" class="form-label custom-form-label">Product Description</label>
+                        <textarea asp-for="Description" class="form-control custom-input" rows="4"></textarea>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label asp-for="Price" class="form-label custom-form-label">Product Price</label>
+                                <input asp-for="Price" class="form-control custom-input" />
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="QuantityStock" class="form-label custom-form-label">Product QuantityStock</label>
+                                <input type="number" min="1" max="100" value="1" asp-for="QuantityStock" class="form-control custom-input" />
+                            </div>
+                        </div>
+
+                        <label asp-for="Poster" class="form-label custom-form-label pb-2 pt-2 d-block">Poster Image</label>
+                        <input type="file" name="posterFile" class="form-control custom-input" />
+
+                        <div class="form-check mt-3">
+                            <input class="form-check-input" type="checkbox" id="createCategoryCheckbox">
+                            <label class="form-check-label" for="createCategoryCheckbox">
+                                Create New Category
+                            </label>
+                        </div>
+
+
+                        <!-- If you have a Category dropdown list -->
+                        <div class="existing-category-select">
+                            <label asp-for="IdCategory" class="form-label custom-form-label pb-2 pt-2 d-block">Category</label>
+                            <select asp-for="IdCategory" asp-items="ViewBag.Categories" class="form-select custom-select">
+                                <option disabled selected>-- Select a category --</option>
+                            </select>
+                        </div>
+
+                        
+
+                        <!-- Input for new category (initially hidden) -->
+                        <div class="new-category-input" style="display: none;">
+                            <label for="categoryName" class="form-label custom-form-label">New Category Name</label>
+                            <input type="text" id="categoryName" name="categoryName" class="form-control custom-input" />
+
+                            <label for="categoryDesc" class="form-label custom-form-label">New Category Description</label>
+                            <textarea id="categoryDesc" name="categoryDesc" class="form-control custom-input" rows="4"></textarea>
+                        </div>
+
+
+                        <button type="submit" class="btn btn-primary custom-primary-btn mt-4">Create</button>
+                    </form>
                 </div>
-
-                <div class="form-group">
-                    <label asp-for="Description">Product Description</label>
-                    <textarea asp-for="Description" class="form-control" rows="4"></textarea>
-                    <span asp-validation-for="Description" class="text-danger"></span>
-                </div>
-
-                <div class="form-group">
-                    <label asp-for="Price">Product Price</label>
-                    <input asp-for="Price" class="form-control" />
-                    <span asp-validation-for="Price" class="text-danger"></span>
-                </div>
-
-                <div class="form-group">
-                    <label asp-for="Poster" class="pb-2 pt-2">Poster Image</label>
-                    <input type="file" name="posterFile" class="form-control" />
-                </div>
-
-
-                <!-- If you have a Category dropdown list -->
-                <div class="form-group">
-                    <label asp-for="IdCategory" class="pb-2 pt-2">Category</label>
-                    <select asp-for="IdCategory" asp-items="ViewBag.Categories" class="form-select">
-                        <option disabled selected>-- Select a category --</option>
-                    </select>
-                </div>
-
-
-                <button type="submit" class="btn btn-primary">Create Product</button>
-            </form>
+            </div>
         </div>
     </div>
 </div>
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const createCategoryCheckbox = document.getElementById('createCategoryCheckbox');
+        const existingCategorySelect = document.querySelector('.existing-category-select');
+        const newCategoryInput = document.querySelector('.new-category-input');
+
+        createCategoryCheckbox.addEventListener('change', function () {
+            existingCategorySelect.style.display = createCategoryCheckbox.checked ? 'none' : 'block';
+            newCategoryInput.style.display = createCategoryCheckbox.checked ? 'block' : 'none';
+        });
+    });
+</script>

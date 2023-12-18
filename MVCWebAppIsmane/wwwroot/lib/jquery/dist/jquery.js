@@ -5817,8 +5817,8 @@ jQuery.each( {
 	keyCode: true,
 	button: true,
 	buttons: true,
-	clientX: true,
-	clientY: true,
+	UserX: true,
+	UserY: true,
 	offsetX: true,
 	offsetY: true,
 	pointerId: true,
@@ -6817,7 +6817,7 @@ function getWidthOrHeight( elem, dimension, extra ) {
 		!parseFloat( val ) && jQuery.css( elem, "display", false, styles ) === "inline" ) &&
 
 		// Make sure the element is visible & connected
-		elem.getClientRects().length ) {
+		elem.getUserRects().length ) {
 
 		isBorderBox = jQuery.css( elem, "boxSizing", false, styles ) === "border-box";
 
@@ -7022,11 +7022,11 @@ jQuery.each( [ "height", "width" ], function( _i, dimension ) {
 
 					// Support: Safari 8+
 					// Table columns in Safari have non-zero offsetWidth & zero
-					// getBoundingClientRect().width unless display is changed.
+					// getBoundingUserRect().width unless display is changed.
 					// Support: IE <=11 only
-					// Running getBoundingClientRect on a disconnected node
+					// Running getBoundingUserRect on a disconnected node
 					// in IE throws an error.
-					( !elem.getClientRects().length || !elem.getBoundingClientRect().width ) ?
+					( !elem.getUserRects().length || !elem.getBoundingUserRect().width ) ?
 					swap( elem, cssShow, function() {
 						return getWidthOrHeight( elem, dimension, extra );
 					} ) :
@@ -7085,9 +7085,9 @@ jQuery.cssHooks.marginLeft = addGetHookIf( support.reliableMarginLeft,
 	function( elem, computed ) {
 		if ( computed ) {
 			return ( parseFloat( curCSS( elem, "marginLeft" ) ) ||
-				elem.getBoundingClientRect().left -
+				elem.getBoundingUserRect().left -
 					swap( elem, { marginLeft: 0 }, function() {
-						return elem.getBoundingClientRect().left;
+						return elem.getBoundingUserRect().left;
 					} )
 			) + "px";
 		}
@@ -9958,7 +9958,7 @@ jQuery.expr.pseudos.hidden = function( elem ) {
 	return !jQuery.expr.pseudos.visible( elem );
 };
 jQuery.expr.pseudos.visible = function( elem ) {
-	return !!( elem.offsetWidth || elem.offsetHeight || elem.getClientRects().length );
+	return !!( elem.offsetWidth || elem.offsetHeight || elem.getUserRects().length );
 };
 
 
@@ -10504,14 +10504,14 @@ jQuery.fn.extend( {
 
 		// Return zeros for disconnected and hidden (display: none) elements (gh-2310)
 		// Support: IE <=11 only
-		// Running getBoundingClientRect on a
+		// Running getBoundingUserRect on a
 		// disconnected node in IE throws an error
-		if ( !elem.getClientRects().length ) {
+		if ( !elem.getUserRects().length ) {
 			return { top: 0, left: 0 };
 		}
 
 		// Get document-relative position by adding viewport scroll to viewport-relative gBCR
-		rect = elem.getBoundingClientRect();
+		rect = elem.getBoundingUserRect();
 		win = elem.ownerDocument.defaultView;
 		return {
 			top: rect.top + win.pageYOffset,
@@ -10533,8 +10533,8 @@ jQuery.fn.extend( {
 		// position:fixed elements are offset from the viewport, which itself always has zero offset
 		if ( jQuery.css( elem, "position" ) === "fixed" ) {
 
-			// Assume position:fixed implies availability of getBoundingClientRect
-			offset = elem.getBoundingClientRect();
+			// Assume position:fixed implies availability of getBoundingUserRect
+			offset = elem.getBoundingUserRect();
 
 		} else {
 			offset = this.offset();
@@ -10663,19 +10663,19 @@ jQuery.each( { Height: "height", Width: "width" }, function( name, type ) {
 					// $( window ).outerWidth/Height return w/h including scrollbars (gh-1729)
 					return funcName.indexOf( "outer" ) === 0 ?
 						elem[ "inner" + name ] :
-						elem.document.documentElement[ "client" + name ];
+						elem.document.documentElement[ "User" + name ];
 				}
 
 				// Get document width or height
 				if ( elem.nodeType === 9 ) {
 					doc = elem.documentElement;
 
-					// Either scroll[Width/Height] or offset[Width/Height] or client[Width/Height],
+					// Either scroll[Width/Height] or offset[Width/Height] or User[Width/Height],
 					// whichever is greatest
 					return Math.max(
 						elem.body[ "scroll" + name ], doc[ "scroll" + name ],
 						elem.body[ "offset" + name ], doc[ "offset" + name ],
-						doc[ "client" + name ]
+						doc[ "User" + name ]
 					);
 				}
 

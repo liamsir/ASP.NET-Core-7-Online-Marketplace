@@ -16,7 +16,7 @@ namespace MVCWebAppIsmane.Security.service
             _jwtSettings = jwtSettings.Value;
         }
 
-        public string GenerateJwtToken(string email)
+        public string GenerateJwtToken(string email, string role)
         {
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.SecretKey));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
@@ -27,6 +27,7 @@ namespace MVCWebAppIsmane.Security.service
                 claims: new[]
                 {
             new Claim(ClaimTypes.Email, email),
+            new Claim(ClaimTypes.Role, role), // Adding the role claim
             // You can add other non-sensitive claims here
             // For instance:
             new Claim("CustomClaim", "SomeValue")
@@ -38,6 +39,7 @@ namespace MVCWebAppIsmane.Security.service
             var jwtToken = new JwtSecurityTokenHandler().WriteToken(token);
             return jwtToken;
         }
+
 
     }
 }

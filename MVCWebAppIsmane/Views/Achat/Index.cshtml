@@ -5,6 +5,7 @@
         <div class="col">
             <h2>Products</h2>
             <form method="post" asp-controller="Achat" asp-action="BuyProducts" class="purchase-form">
+                
                 @for (var i = 0; i < Model.Count; i++)
                 {
                     <div class="card mb-3">

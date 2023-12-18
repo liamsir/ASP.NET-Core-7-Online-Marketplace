@@ -13,6 +13,7 @@
   <ItemGroup>
     <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="7.0.12" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="7.0.12" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.12" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="7.0.12" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="7.0.12">
@@ -23,9 +24,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Views\Client\" />
+    <Folder Include="Migrations\" />
+    <Folder Include="Views\Acces\" />
     <Folder Include="Views\Achat\" />
     <Folder Include="Views\LigneAchat\" />
+    <Folder Include="wwwroot\pics\" />
   </ItemGroup>
 
   <ItemGroup>

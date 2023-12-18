@@ -2,7 +2,8 @@
 {
     public class LoginVM
     {
-        public String Email { get; set; }
-        public String Password { get; set; }
+        public required string Email { get; set; }
+        public required string Password { get; set; }
+        
     }
 }

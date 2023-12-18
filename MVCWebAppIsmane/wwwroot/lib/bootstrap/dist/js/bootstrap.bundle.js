@@ -145,7 +145,7 @@
   };
 
   const isVisible = element => {
-    if (!isElement$1(element) || element.getClientRects().length === 0) {
+    if (!isElement$1(element) || element.getUserRects().length === 0) {
       return false;
     }
 
@@ -973,7 +973,7 @@
     },
 
     offset(element) {
-      const rect = element.getBoundingClientRect();
+      const rect = element.getBoundingUserRect();
       return {
         top: rect.top + window.pageYOffset,
         left: rect.left + window.pageXOffset
@@ -1288,20 +1288,20 @@
     _addTouchEventListeners() {
       const start = event => {
         if (this._pointerEvent && (event.pointerType === POINTER_TYPE_PEN || event.pointerType === POINTER_TYPE_TOUCH)) {
-          this.touchStartX = event.clientX;
+          this.touchStartX = event.UserX;
         } else if (!this._pointerEvent) {
-          this.touchStartX = event.touches[0].clientX;
+          this.touchStartX = event.touches[0].UserX;
         }
       };
 
       const move = event => {
         // ensure swiping with one touch and not pinching
-        this.touchDeltaX = event.touches && event.touches.length > 1 ? 0 : event.touches[0].clientX - this.touchStartX;
+        this.touchDeltaX = event.touches && event.touches.length > 1 ? 0 : event.touches[0].UserX - this.touchStartX;
       };
 
       const end = event => {
         if (this._pointerEvent && (event.pointerType === POINTER_TYPE_PEN || event.pointerType === POINTER_TYPE_TOUCH)) {
-          this.touchDeltaX = event.clientX - this.touchStartX;
+          this.touchDeltaX = event.UserX - this.touchStartX;
         }
 
         this._handleSwipe();
@@ -1783,7 +1783,7 @@
 
       const dimension = this._getDimension();
 
-      this._element.style[dimension] = `${this._element.getBoundingClientRect()[dimension]}px`;
+      this._element.style[dimension] = `${this._element.getBoundingUserRect()[dimension]}px`;
       reflow(this._element);
 
       this._element.classList.add(CLASS_NAME_COLLAPSING);
@@ -2079,12 +2079,12 @@
   }
 
   var round$1 = Math.round;
-  function getBoundingClientRect(element, includeScale) {
+  function getBoundingUserRect(element, includeScale) {
     if (includeScale === void 0) {
       includeScale = false;
     }
 
-    var rect = element.getBoundingClientRect();
+    var rect = element.getBoundingUserRect();
     var scaleX = 1;
     var scaleY = 1;
 
@@ -2109,18 +2109,18 @@
   // means it doesn't take into account transforms.
 
   function getLayoutRect(element) {
-    var clientRect = getBoundingClientRect(element); // Use the clientRect sizes if it's not been transformed.
+    var UserRect = getBoundingUserRect(element); // Use the UserRect sizes if it's not been transformed.
     // Fixes https://github.com/popperjs/popper-core/issues/1223
 
     var width = element.offsetWidth;
     var height = element.offsetHeight;
 
-    if (Math.abs(clientRect.width - width) <= 1) {
-      width = clientRect.width;
+    if (Math.abs(UserRect.width - width) <= 1) {
+      width = UserRect.width;
     }
 
-    if (Math.abs(clientRect.height - height) <= 1) {
-      height = clientRect.height;
+    if (Math.abs(UserRect.height - height) <= 1) {
+      height = UserRect.height;
     }
 
     return {
@@ -2306,13 +2306,13 @@
     var endDiff = state.rects.reference[len] + state.rects.reference[axis] - popperOffsets[axis] - state.rects.popper[len];
     var startDiff = popperOffsets[axis] - state.rects.reference[axis];
     var arrowOffsetParent = getOffsetParent(arrowElement);
-    var clientSize = arrowOffsetParent ? axis === 'y' ? arrowOffsetParent.clientHeight || 0 : arrowOffsetParent.clientWidth || 0 : 0;
+    var UserSize = arrowOffsetParent ? axis === 'y' ? arrowOffsetParent.UserHeight || 0 : arrowOffsetParent.UserWidth || 0 : 0;
     var centerToReference = endDiff / 2 - startDiff / 2; // Make sure the arrow doesn't overflow the popper if the center point is
     // outside of the popper bounds
 
     var min = paddingObject[minProp];
-    var max = clientSize - arrowRect[len] - paddingObject[maxProp];
-    var center = clientSize / 2 - arrowRect[len] / 2 + centerToReference;
+    var max = UserSize - arrowRect[len] - paddingObject[maxProp];
+    var center = UserSize / 2 - arrowRect[len] / 2 + centerToReference;
     var offset = within(min, center, max); // Prevents breaking syntax highlighting...
 
     var axisProp = axis;
@@ -2403,8 +2403,8 @@
 
     if (adaptive) {
       var offsetParent = getOffsetParent(popper);
-      var heightProp = 'clientHeight';
-      var widthProp = 'clientWidth';
+      var heightProp = 'UserHeight';
+      var widthProp = 'UserWidth';
 
       if (offsetParent === getWindow(popper)) {
         offsetParent = getDocumentElement(popper);
@@ -2583,19 +2583,19 @@
     // anyway.
     // Browsers where the left scrollbar doesn't cause an issue report `0` for
     // this (e.g. Edge 2019, IE11, Safari)
-    return getBoundingClientRect(getDocumentElement(element)).left + getWindowScroll(element).scrollLeft;
+    return getBoundingUserRect(getDocumentElement(element)).left + getWindowScroll(element).scrollLeft;
   }
 
   function getViewportRect(element) {
     var win = getWindow(element);
     var html = getDocumentElement(element);
     var visualViewport = win.visualViewport;
-    var width = html.clientWidth;
-    var height = html.clientHeight;
+    var width = html.UserWidth;
+    var height = html.UserHeight;
     var x = 0;
     var y = 0; // NB: This isn't supported on iOS <= 12. If the keyboard is open, the popper
     // can be obscured underneath it.
-    // Also, `html.clientHeight` adds the bottom bar height in Safari iOS, even
+    // Also, `html.UserHeight` adds the bottom bar height in Safari iOS, even
     // if it isn't open, so if this isn't available, the popper will be detected
     // to overflow the bottom of the screen too early.
 
@@ -2632,13 +2632,13 @@
     var html = getDocumentElement(element);
     var winScroll = getWindowScroll(element);
     var body = (_element$ownerDocumen = element.ownerDocument) == null ? void 0 : _element$ownerDocumen.body;
-    var width = max(html.scrollWidth, html.clientWidth, body ? body.scrollWidth : 0, body ? body.clientWidth : 0);
-    var height = max(html.scrollHeight, html.clientHeight, body ? body.scrollHeight : 0, body ? body.clientHeight : 0);
+    var width = max(html.scrollWidth, html.UserWidth, body ? body.scrollWidth : 0, body ? body.UserWidth : 0);
+    var height = max(html.scrollHeight, html.UserHeight, body ? body.scrollHeight : 0, body ? body.UserHeight : 0);
     var x = -winScroll.scrollLeft + getWindowScrollBarX(element);
     var y = -winScroll.scrollTop;
 
     if (getComputedStyle$1(body || html).direction === 'rtl') {
-      x += max(html.clientWidth, body ? body.clientWidth : 0) - width;
+      x += max(html.UserWidth, body ? body.UserWidth : 0) - width;
     }
 
     return {
@@ -2695,7 +2695,7 @@
     updatedList.concat(listScrollParents(getParentNode(target)));
   }
 
-  function rectToClientRect(rect) {
+  function rectToUserRect(rect) {
     return Object.assign({}, rect, {
       left: rect.x,
       top: rect.y,
@@ -2704,21 +2704,21 @@
     });
   }
 
-  function getInnerBoundingClientRect(element) {
-    var rect = getBoundingClientRect(element);
-    rect.top = rect.top + element.clientTop;
-    rect.left = rect.left + element.clientLeft;
-    rect.bottom = rect.top + element.clientHeight;
-    rect.right = rect.left + element.clientWidth;
-    rect.width = element.clientWidth;
-    rect.height = element.clientHeight;
+  function getInnerBoundingUserRect(element) {
+    var rect = getBoundingUserRect(element);
+    rect.top = rect.top + element.UserTop;
+    rect.left = rect.left + element.UserLeft;
+    rect.bottom = rect.top + element.UserHeight;
+    rect.right = rect.left + element.UserWidth;
+    rect.width = element.UserWidth;
+    rect.height = element.UserHeight;
     rect.x = rect.left;
     rect.y = rect.top;
     return rect;
   }
 
-  function getClientRectFromMixedType(element, clippingParent) {
-    return clippingParent === viewport ? rectToClientRect(getViewportRect(element)) : isHTMLElement(clippingParent) ? getInnerBoundingClientRect(clippingParent) : rectToClientRect(getDocumentRect(getDocumentElement(element)));
+  function getUserRectFromMixedType(element, clippingParent) {
+    return clippingParent === viewport ? rectToUserRect(getViewportRect(element)) : isHTMLElement(clippingParent) ? getInnerBoundingUserRect(clippingParent) : rectToUserRect(getDocumentRect(getDocumentElement(element)));
   } // A "clipping parent" is an overflowable container with the characteristic of
   // clipping (or hiding) overflowing elements with a position different from
   // `initial`
@@ -2746,13 +2746,13 @@
     var clippingParents = [].concat(mainClippingParents, [rootBoundary]);
     var firstClippingParent = clippingParents[0];
     var clippingRect = clippingParents.reduce(function (accRect, clippingParent) {
-      var rect = getClientRectFromMixedType(element, clippingParent);
+      var rect = getUserRectFromMixedType(element, clippingParent);
       accRect.top = max(rect.top, accRect.top);
       accRect.right = min(rect.right, accRect.right);
       accRect.bottom = min(rect.bottom, accRect.bottom);
       accRect.left = max(rect.left, accRect.left);
       return accRect;
-    }, getClientRectFromMixedType(element, firstClippingParent));
+    }, getUserRectFromMixedType(element, firstClippingParent));
     clippingRect.width = clippingRect.right - clippingRect.left;
     clippingRect.height = clippingRect.bottom - clippingRect.top;
     clippingRect.x = clippingRect.left;
@@ -2852,23 +2852,23 @@
     var referenceElement = state.elements.reference;
     var popperRect = state.rects.popper;
     var element = state.elements[altBoundary ? altContext : elementContext];
-    var clippingClientRect = getClippingRect(isElement(element) ? element : element.contextElement || getDocumentElement(state.elements.popper), boundary, rootBoundary);
-    var referenceClientRect = getBoundingClientRect(referenceElement);
+    var clippingUserRect = getClippingRect(isElement(element) ? element : element.contextElement || getDocumentElement(state.elements.popper), boundary, rootBoundary);
+    var referenceUserRect = getBoundingUserRect(referenceElement);
     var popperOffsets = computeOffsets({
-      reference: referenceClientRect,
+      reference: referenceUserRect,
       element: popperRect,
       strategy: 'absolute',
       placement: placement
     });
-    var popperClientRect = rectToClientRect(Object.assign({}, popperRect, popperOffsets));
-    var elementClientRect = elementContext === popper ? popperClientRect : referenceClientRect; // positive = overflowing the clipping rect
+    var popperUserRect = rectToUserRect(Object.assign({}, popperRect, popperOffsets));
+    var elementUserRect = elementContext === popper ? popperUserRect : referenceUserRect; // positive = overflowing the clipping rect
     // 0 or negative = within the clipping rect
 
     var overflowOffsets = {
-      top: clippingClientRect.top - elementClientRect.top + paddingObject.top,
-      bottom: elementClientRect.bottom - clippingClientRect.bottom + paddingObject.bottom,
-      left: clippingClientRect.left - elementClientRect.left + paddingObject.left,
-      right: elementClientRect.right - clippingClientRect.right + paddingObject.right
+      top: clippingUserRect.top - elementUserRect.top + paddingObject.top,
+      bottom: elementUserRect.bottom - clippingUserRect.bottom + paddingObject.bottom,
+      left: clippingUserRect.left - elementUserRect.left + paddingObject.left,
+      right: elementUserRect.right - clippingUserRect.right + paddingObject.right
     };
     var offsetData = state.modifiersData.offset; // Offsets can be applied only to the popper element
 
@@ -3274,9 +3274,9 @@
       var minOffset = isBasePlacement ? referenceRect[len] / 2 - additive - arrowLen - arrowPaddingMin - tetherOffsetValue : minLen - arrowLen - arrowPaddingMin - tetherOffsetValue;
       var maxOffset = isBasePlacement ? -referenceRect[len] / 2 + additive + arrowLen + arrowPaddingMax + tetherOffsetValue : maxLen + arrowLen + arrowPaddingMax + tetherOffsetValue;
       var arrowOffsetParent = state.elements.arrow && getOffsetParent(state.elements.arrow);
-      var clientOffset = arrowOffsetParent ? mainAxis === 'y' ? arrowOffsetParent.clientTop || 0 : arrowOffsetParent.clientLeft || 0 : 0;
+      var UserOffset = arrowOffsetParent ? mainAxis === 'y' ? arrowOffsetParent.UserTop || 0 : arrowOffsetParent.UserLeft || 0 : 0;
       var offsetModifierValue = state.modifiersData.offset ? state.modifiersData.offset[state.placement][mainAxis] : 0;
-      var tetherMin = popperOffsets[mainAxis] + minOffset - offsetModifierValue - clientOffset;
+      var tetherMin = popperOffsets[mainAxis] + minOffset - offsetModifierValue - UserOffset;
       var tetherMax = popperOffsets[mainAxis] + maxOffset - offsetModifierValue;
 
       if (checkMainAxis) {
@@ -3331,7 +3331,7 @@
   }
 
   function isElementScaled(element) {
-    var rect = element.getBoundingClientRect();
+    var rect = element.getBoundingUserRect();
     var scaleX = rect.width / element.offsetWidth || 1;
     var scaleY = rect.height / element.offsetHeight || 1;
     return scaleX !== 1 || scaleY !== 1;
@@ -3347,7 +3347,7 @@
     var isOffsetParentAnElement = isHTMLElement(offsetParent);
     var offsetParentIsScaled = isHTMLElement(offsetParent) && isElementScaled(offsetParent);
     var documentElement = getDocumentElement(offsetParent);
-    var rect = getBoundingClientRect(elementOrVirtualElement, offsetParentIsScaled);
+    var rect = getBoundingUserRect(elementOrVirtualElement, offsetParentIsScaled);
     var scroll = {
       scrollLeft: 0,
       scrollTop: 0
@@ -3364,9 +3364,9 @@
       }
 
       if (isHTMLElement(offsetParent)) {
-        offsets = getBoundingClientRect(offsetParent, true);
-        offsets.x += offsetParent.clientLeft;
-        offsets.y += offsetParent.clientTop;
+        offsets = getBoundingUserRect(offsetParent, true);
+        offsets.x += offsetParent.UserLeft;
+        offsets.y += offsetParent.UserTop;
       } else if (documentElement) {
         offsets.x = getWindowScrollBarX(documentElement);
       }
@@ -3466,7 +3466,7 @@
     }
 
     return !args.some(function (element) {
-      return !(element && typeof element.getBoundingClientRect === 'function');
+      return !(element && typeof element.getBoundingUserRect === 'function');
     });
   }
 
@@ -3897,9 +3897,9 @@
       };
       typeCheckConfig(NAME$9, config, this.constructor.DefaultType);
 
-      if (typeof config.reference === 'object' && !isElement$1(config.reference) && typeof config.reference.getBoundingClientRect !== 'function') {
-        // Popper virtual elements require a getBoundingClientRect method
-        throw new TypeError(`${NAME$9.toUpperCase()}: Option "reference" provided type "object" without a required "getBoundingClientRect" method.`);
+      if (typeof config.reference === 'object' && !isElement$1(config.reference) && typeof config.reference.getBoundingUserRect !== 'function') {
+        // Popper virtual elements require a getBoundingUserRect method
+        throw new TypeError(`${NAME$9.toUpperCase()}: Option "reference" provided type "object" without a required "getBoundingUserRect" method.`);
       }
 
       return config;
@@ -4176,7 +4176,7 @@
 
     getWidth() {
       // https://developer.mozilla.org/en-US/docs/Web/API/Window/innerWidth#usage_notes
-      const documentWidth = document.documentElement.clientWidth;
+      const documentWidth = document.documentElement.UserWidth;
       return Math.abs(window.innerWidth - documentWidth);
     }
 
@@ -4204,7 +4204,7 @@
       const scrollbarWidth = this.getWidth();
 
       const manipulationCallBack = element => {
-        if (element !== this._element && window.innerWidth > element.clientWidth + scrollbarWidth) {
+        if (element !== this._element && window.innerWidth > element.UserWidth + scrollbarWidth) {
           return;
         }
 
@@ -4806,7 +4806,7 @@
         scrollHeight,
         style
       } = this._element;
-      const isModalOverflowing = scrollHeight > document.documentElement.clientHeight; // return if the following background transition hasn't yet completed
+      const isModalOverflowing = scrollHeight > document.documentElement.UserHeight; // return if the following background transition hasn't yet completed
 
       if (!isModalOverflowing && style.overflowY === 'hidden' || classList.contains(CLASS_NAME_STATIC)) {
         return;
@@ -4835,7 +4835,7 @@
 
 
     _adjustDialog() {
-      const isModalOverflowing = this._element.scrollHeight > document.documentElement.clientHeight;
+      const isModalOverflowing = this._element.scrollHeight > document.documentElement.UserHeight;
 
       const scrollbarWidth = this._scrollBar.getWidth();
 
@@ -6175,7 +6175,7 @@
         const target = targetSelector ? SelectorEngine.findOne(targetSelector) : null;
 
         if (target) {
-          const targetBCR = target.getBoundingClientRect();
+          const targetBCR = target.getBoundingUserRect();
 
           if (targetBCR.width || targetBCR.height) {
             return [Manipulator[offsetMethod](target).top + offsetBase, targetSelector];
@@ -6215,7 +6215,7 @@
     }
 
     _getOffsetHeight() {
-      return this._scrollElement === window ? window.innerHeight : this._scrollElement.getBoundingClientRect().height;
+      return this._scrollElement === window ? window.innerHeight : this._scrollElement.getBoundingUserRect().height;
     }
 
     _process() {

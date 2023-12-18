@@ -4,6 +4,6 @@
     {
         public int Id { get; set; }
 
-        Client Client { get; set; }   
+        User User { get; set; }   
     }
 }

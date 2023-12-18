@@ -78,7 +78,8 @@
     <div class="card mx-auto" style="width: 18rem;">
         <div class="card-body">
             <h5 class="card-title text-center">Login</h5>
-            <form method="post" asp-controller="LoginVM" asp-action="Login">
+            <form method="post" asp-controller="Auth" asp-action="Login">
+
                 <!-- Use the form-group and form-control classes to style the input fields and labels -->
                 <div class="form-group">
                     <label for="email">Email:</label>
@@ -88,14 +89,13 @@
                     <label for="password">Password:</label>
                     <input type="password" class="form-control" id="password" name="Password" required>
                 </div>
+
                 <!-- Use the btn and btn-primary classes to style the button -->
                 <button type="submit" class="btn btn-primary login">Login</button>
             </form>
             <!-- Use the text-center class to align the elements to the center -->
             <div class="text-center">
-
-                <p>Don't have an account? <a asp-controller="LoginVM" asp-action="SignUp"> Register </a>.</p>
-
+                <p>Don't have an account? <a asp-controller="Auth" asp-action="SignUp">Register</a>.</p>
             </div>
         </div>
     </div>
