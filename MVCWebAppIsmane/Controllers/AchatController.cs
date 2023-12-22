@@ -157,7 +157,7 @@ namespace MVCWebAppIsmane.Controllers
                             }
 
                             await _achatRepository.Update(achat); // Update Achat with LigneAchats references
-                            _logger.LogInformation("====> CLIENT WITH ID => " + achat.IdUser + " BUY " + achat.Id);
+                            _logger.LogInformation("====> CLIENT WITH ID => " + achat.IdUser + " effectue un achat");
                             _memoryCache.Remove("Products");
                             return RedirectToAction("Index", "Product");
                         }
