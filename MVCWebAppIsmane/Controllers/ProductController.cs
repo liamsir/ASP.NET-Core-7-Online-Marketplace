@@ -306,8 +306,13 @@ namespace MVCWebAppIsmane.Controllers
 
                 // Cache the products with a specific expiration time
                 _memoryCache.Set(cacheKey, products, TimeSpan.FromMinutes(10)); // Cache for 10 minutes
+                _logger.LogInformation("====>products with category => " + categoryId + " and name => " + searchTerm + "get retrieve");
             }
-            _logger.LogInformation("====>products with category => "+categoryId + " and name => "+searchTerm +"get retrieve");
+            else
+            {
+                _logger.LogInformation("====>products with category => " + categoryId + " and name => " + searchTerm + "get retrieve from CACHE");
+            }
+            
             return View("Index", products);
         }
 

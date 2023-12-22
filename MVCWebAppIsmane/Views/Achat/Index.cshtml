@@ -1,4 +1,18 @@
 ﻿@model List<Product>
+<style>
+    .card-left {
+        font-family: 'Arial', sans-serif;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .stock-quantity {
+        font-size: 1.5em;
+        font-weight: bold;
+        color: #FF5733; /* Change this to any color you prefer */
+        animation: heartbeat 1s infinite; /* Animate the quantity */
+    }
+</style>
 
 <div class="container">
     <div class="row">
@@ -17,10 +31,13 @@
                                 <div class="card-body">
                                     <h5 class="card-title">@Model[i].Name</h5>
                                     <p class="card-text">Description: @Model[i].Description</p>
-                                    <p class="card-text">Price: $@Model[i].Price</p>
+                                    <p class="card-text">Price: @Model[i].Price dh</p>
+                                    <p class="card-left">
+                                        In Stock : <span class="stock-quantity">@Model[i].QuantityStock</span>
+                                    </p>
                                     <div class="input-group">
                                         <input type="hidden" name="productIds[@i]" value="@Model[i].Id" />
-                                        <input type="number" min="1" max="50" name="quantities[@i]" class="form-control quantity-input" value="1">
+                                        <input type="number" min="1" max=@Model[i].QuantityStock name="quantities[@i]" class="form-control quantity-input" value="1">
                                         <input type="hidden" name="prices[@i]" value="@Model[i].Price" />
                                     </div>
                                 </div>

@@ -17,7 +17,6 @@ namespace MVCWebAppIsmane.Data
         public DbSet<Product> Products { get; set; }
         public DbSet<Achat> Achats { get; set; }
         public DbSet<User> Clients { get; set; }
-
         public DbSet<LigneAchat> LigneAchats { get; set; }
 
 

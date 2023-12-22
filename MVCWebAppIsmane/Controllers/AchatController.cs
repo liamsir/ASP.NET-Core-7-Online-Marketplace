@@ -144,8 +144,6 @@ namespace MVCWebAppIsmane.Controllers
                                         ligneAchat.IdProduct = productId;
                                         ligneAchat.quantity = quantite;
                                         
-
-
                                         await _ligneAchatRepository.Create(ligneAchat);
                                         achat.LigneAchats.Add(ligneAchat);
                                         _logger.LogInformation("====>ligne Achat with product " + ligneAchat.IdProduct + " get created");
@@ -160,6 +158,7 @@ namespace MVCWebAppIsmane.Controllers
 
                             await _achatRepository.Update(achat); // Update Achat with LigneAchats references
                             _logger.LogInformation("====> CLIENT WITH ID => " + achat.IdUser + " BUY " + achat.Id);
+                            _memoryCache.Remove("Products");
                             return RedirectToAction("Index", "Product");
                         }
 

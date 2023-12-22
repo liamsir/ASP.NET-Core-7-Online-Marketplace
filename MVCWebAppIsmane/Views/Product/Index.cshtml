@@ -65,6 +65,48 @@
         .product-card:hover .btn-group {
             opacity: 1;
         }
+
+        .card-left {
+  font-family: 'Arial', sans-serif;
+  position: relative;
+  overflow: hidden;
+}
+
+.stock-quantity {
+  font-size: 1.5em;
+  font-weight: bold;
+  color: #FF5733; /* Change this to any color you prefer */
+  animation: heartbeat 1s infinite; /* Animate the quantity */
+}
+
+    .out-of-stock-message {
+        text-align: center;
+        font-family: 'Helvetica', sans-serif;
+        font-size: 1.2em;
+        padding: 15px;
+        border-radius: 8px;
+        margin-top: 20px;
+        background-color: #E0E0E0; /* Light gray background */
+        color: #333; /* Dark gray text */
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+
+
+
+
+        .out-of-stock-message p {
+            margin: 0; /* Remove default margin for the paragraph */
+        }
+
+        /* For a subtle animation effect */
+        .out-of-stock-message:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+        }
+
+
 </style>
 
 
@@ -89,24 +131,41 @@
                         <div class="card-body">
                             <h5 class="card-title">@product.Name</h5>
                             <p class="card-text">@product.Description</p>
-                            <p class="card-text">$@product.Price</p>
+                            <p class="card-text">@product.Price dh</p>
+                           
+
 
                             @if (roleClaim == null || roleClaim == "Customer")
                             {
-                                <div class="d-grid gap-2">
-                                    <form method="post" asp-action="AddToCart" asp-controller="Panier">
-                                        <input type="hidden" name="productId" value="@product.Id">
-                                        <button type="submit" class="btn btn-success">
-                                            <i class="bi bi-cart-plus"></i> Add to Cart
-                                        </button>
-                                    </form>
-                                    <form method="get" asp-action="ViewProducts" asp-controller="Achat">
-                                        <input type="hidden" name="ids" value="@product.Id">
-                                        <button type="submit" class="btn btn-primary">
-                                            Buy Now
-                                        </button>
-                                    </form>
-                                </div>
+                                @if (@product.QuantityStock <= 0)
+                                {
+                                    <div class="out-of-stock-message">
+                                        <p>Oops! This item is currently out of stock.</p>
+                                    </div>
+
+                                }
+                                else
+                                {
+                                    <p class="card-left">
+                                        Hurry! Only <span class="stock-quantity">@product.QuantityStock</span> pieces left in stock!
+                                    </p>
+                                    
+                                    <div class="d-grid gap-2">
+                                        <form method="post" asp-action="AddToCart" asp-controller="Panier">
+                                            <input type="hidden" name="productId" value="@product.Id">
+                                            <button type="submit" class="btn btn-success">
+                                                <i class="bi bi-cart-plus"></i> Add to Cart
+                                            </button>
+                                        </form>
+                                        <form method="get" asp-action="ViewProducts" asp-controller="Achat">
+                                            <input type="hidden" name="ids" value="@product.Id">
+                                        
+                                            <button type="submit" class="btn btn-primary">
+                                                Buy Now
+                                            </button>
+                                        </form>
+                                    </div>
+                                }
                             }
                             else if (roleClaim == "Admin")
                             {
